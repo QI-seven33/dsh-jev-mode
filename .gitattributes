@@ -1,0 +1,15 @@
+# Keep LF in the repository for every text file.
+#
+# This bundle contains multi-byte UTF-8 (Chinese strings in the prompt and UI
+# text). Normalising line endings here keeps the working tree byte-stable across
+# platforms, which matters twice over for this plugin: a changed byte anywhere in
+# the request prefix invalidates provider cache reuse from that token.
+* text=auto eol=lf
+
+# Binary assets stay untouched.
+*.png binary
+*.gif binary
+*.jpg binary
+*.ico binary
+*.mp3 binary
+*.wav binary

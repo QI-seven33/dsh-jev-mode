@@ -1,0 +1,93 @@
+{
+  "name": "dsh-jev-mode",
+  "version": "0.4.2",
+  "description": "DeepSeek Harness Desktop plugin: deterministic project reads, optional bounded semantic selection, and a separate authorization gate with fixed prompt/tool prefixes.",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "jev",
+    "decision-model",
+    "agent-preset",
+    "prompt-cache"
+  ],
+  "type": "module",
+  "main": "settings.js",
+  "exports": {
+    ".": "./settings.js",
+    "./lib/*": "./lib/*",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*": "./locale/*",
+    "./package.json": "./package.json",
+    "./mode": "./index.js",
+    "./client": "./client.js"
+  },
+  "files": [
+    "index.js",
+    "lib",
+    "locale",
+    "cordis.patch.yml",
+    "icon.svg",
+    "README.md",
+    "README.zh.md",
+    "PROVENANCE.md",
+    "RELEASING.md",
+    "CHANGELOG.md",
+    "REPAIR-0.2.0.md",
+    "REPAIR-0.3.0.md",
+    "LICENSE",
+    "ACCEPTANCE.zh.md",
+    "REPAIR-0.4.0.md",
+    "settings.js",
+    "client.js",
+    "INSTALL.zh.md",
+    "assets",
+    "screenshots.json",
+    "VALIDATION.md"
+  ],
+  "license": "MIT",
+  "icon": "./icon.svg",
+  "engines": {
+    "node": ">=20.3.0"
+  },
+  "devDependencies": {
+    "yaml": "^2.6.0"
+  },
+  "scripts": {
+    "test": "node test/no-credentials.mjs && node test/manifest.test.mjs && node test/validate-patch.mjs && node test/boot.test.mjs && node test/decision.test.mjs && node test/transport.test.mjs && node test/repair.test.mjs && node test/persistence.test.mjs && node test/controlled.test.mjs && node test/selection.test.mjs && node test/settings.test.mjs",
+    "test:controlled": "node test/controlled.test.mjs",
+    "bench:compare": "node bench/compare.mjs",
+    "test:persistence": "node test/persistence.test.mjs",
+    "test:secrets": "node test/no-credentials.mjs",
+    "test:manifest": "node test/manifest.test.mjs",
+    "test:patch": "node test/validate-patch.mjs",
+    "test:boot": "node test/boot.test.mjs",
+    "test:decision": "node test/decision.test.mjs",
+    "test:transport": "node test/transport.test.mjs",
+    "bench": "node bench/bench.mjs",
+    "bench:cache": "node bench/cache-probe.mjs",
+    "test:selection": "node test/selection.test.mjs"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings-models",
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-api-remotes"
+      ]
+    }
+  },
+  "author": "QI-seven33",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/QI-seven33/dsh-jev-mode.git"
+  },
+  "homepage": "https://github.com/QI-seven33/dsh-jev-mode#readme",
+  "bugs": {
+    "url": "https://github.com/QI-seven33/dsh-jev-mode/issues"
+  }
+}

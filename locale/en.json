@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "JEV decision mode",
+    "description": "Standard mode with deterministic reads, optional bounded semantic selection, and a separate authorization gate; fixed prompt and tool prefixes."
+  }
+}

@@ -1,0 +1,17 @@
+# Local output that must not be published
+bench/results/
+node_modules/
+*.log
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+.env
+.env.*
+.credentials.yaml
+.dsh/
+*.tgz
+*.zip

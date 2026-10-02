@@ -1,0 +1,85 @@
+# Offline verification for dsh-jev-mode.
+#
+# Everything here runs without a DSH installation and without any credential.
+# The two exceptions are reported rather than hidden:
+#   * the host tool-schema compiler is borrowed from a local DSH install when one
+#     is present; a runner has none, so the suite is told to accept that one skip
+#     (DSH_ALLOW_SKIPPED_HOST_TOOLS) and prints the gap in its output;
+#   * the patch validator needs a YAML parser, which the devDependency supplies.
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # engines.node declares >=20.3.0; the plugin uses AbortSignal.any and
+        # Promise.withResolvers behind fallbacks, so older minors are covered.
+        node: ['20', '22', '24']
+    env:
+      DSH_ALLOW_SKIPPED_HOST_TOOLS: '1'
+      DSH_ALLOW_SKIPPED_HOST_PERSISTENCE: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install the YAML parser used by the patch validator
+        run: npm install --no-save --no-package-lock yaml@2
+
+      - name: No credential material in the tree
+        # A fixture copied from a real conversation looks like any other fixture,
+        # so this runs before everything else and before anything could be tagged.
+        run: node test/no-credentials.mjs
+
+      - name: Manifest and bundle integrity
+        run: node test/manifest.test.mjs
+
+      - name: Boot checks (contracts, real schema validation, prefix stability)
+        run: node test/boot.test.mjs
+
+      - name: Decision path (end-to-end with a scripted provider)
+        run: node test/decision.test.mjs
+
+      - name: Transport (HTTP decision engine and the jev_gate tool)
+        run: node test/transport.test.mjs
+
+      - name: Bundle patch (YAML structure and standard capability set)
+        run: node test/validate-patch.mjs
+
+      - name: Repair regressions (cache, authorization, ledger, routing)
+        run: node test/repair.test.mjs
+
+      - name: Native durable session regression (requires installed host)
+        run: node test/persistence.test.mjs
+
+      - name: Native controlled-flow regression (requires installed host)
+        run: node test/controlled.test.mjs
+
+      - name: Deterministic-first selection and failure policy
+        run: node test/selection.test.mjs
+
+      - name: Credential settings contracts
+        run: node test/settings.test.mjs
+
+      - name: Benchmark (also proves the measurement script runs)
+        run: node bench/bench.mjs
+
+      - name: Live cache probe
+        # Opt-in by design: it spends real tokens, so it reports SKIP and exits 0
+        # when no credential is present, which is the case on a runner. Where a
+        # secret is configured it measures the actual provider cache behaviour.
+        run: node bench/cache-probe.mjs
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
