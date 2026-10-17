@@ -35,10 +35,15 @@ const [{ Context }, llm, sessions, system, tools, agents, loop, projections, per
 ]);
 const root = await mkdtemp(path.join(os.tmpdir(), 'jev-controlled-'));
 let choice = 'project_manifest', confidence = .98, httpCalls = 0, decisionDelay = 0;
+let authorizationProbability = .1, authorizationHook;
 const server = http.createServer((req, res) => {
   let body = ''; req.on('data', b => body += b); req.on('end', () => {
     httpCalls++; const data = JSON.parse(body);
-    if (data.questions.authorize) { res.end(JSON.stringify({ answers: { authorize: { type: 'noul', noul: .1 } } })); return; }
+    if (data.questions.authorize) {
+      const respond = () => { if (!res.writableEnded && !res.destroyed) res.end(JSON.stringify({ answers: { authorize: { type: 'noul', noul: authorizationProbability } } })); };
+      if (authorizationHook) authorizationHook(respond); else respond();
+      return;
+    }
     assert.ok(data.questions.dispatch);
     const payload = JSON.stringify({ answers: { dispatch: { type: 'choice', choice, confidence,
       probabilities: { [choice]: confidence, ...(choice !== 'none' ? { none: 1 - confidence } : { project_manifest: 1 - confidence }) } } } });
@@ -119,7 +124,7 @@ try {
   const zero = await host('zero-budget', {pluginConfig:{maxDecisionsPerSession:0}});
   await turn(zero,'package.json 的项目名称是什么？'); assert.equal(zero.executions.length,1); assert.equal(httpCalls,0);
   const status = await zero.ctx.tools.execute({name:'jev_status',arguments:{},callId:'native-status',agent:zero.agent,signal:AbortSignal.timeout(1000)});
-  assert.equal(status.isError,false); assert.equal(status.value.version,'0.4.2');
+  assert.equal(status.isError,false); assert.equal(status.value.version,JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version);
   assert.equal(status.value.codeSelections,1); assert.equal(status.value.semanticSelections,0); assert.equal(status.value.decisions,0);
   await close(zero);
   const dual = await host('two-files'); await turn(dual,'README.md 的用途与 package.json 的依赖分别是什么？');
@@ -158,6 +163,36 @@ try {
   assert.equal(hard.isError, true); assert.equal(existsSync(credential), false); assert.equal(httpCalls, beforeHard);
   await close(gated);
   console.log('ok native risky write and credential-write bodies never execute; hard rule uses zero JEV calls');
+  authorizationProbability = .99;
+  for (const phase of ['unchanged', 'pending-revocation', 'downstream-revocation', 'cancel']) {
+    const fresh = await host('authorization-'+phase);
+    const target = path.join(root, phase+'.txt');
+    const user = text => fresh.agent.session.append('user/message', llm.createUserMessage({ source: { kind: 'user' }, content: [{ type: 'text', text }] }), { surfaceOp: 'append' });
+    user('You may write the approved fixture file outside the project once.');
+    let received, release;
+    const seen = new Promise(r => { received = r; });
+    if (phase === 'pending-revocation' || phase === 'cancel') authorizationHook = respond => { release = respond; received(); };
+    if (phase === 'downstream-revocation') fresh.ctx.on('tools/pre-execute', async (exec, next) => {
+      if (exec.callId === 'fresh-'+phase) user('I revoke the write authorization. Do not write.');
+      return next();
+    });
+    const controller = new AbortController(); let timer;
+    const pending = fresh.ctx.tools.execute({ name: 'write', arguments: { file_path: target, content: 'isolated fixture' },
+      callId: 'fresh-'+phase, agent: fresh.agent, signal: controller.signal });
+    try {
+      if (authorizationHook) {
+        await Promise.race([seen, new Promise((_, reject) => { timer = setTimeout(() => reject(Error('authorization fixture did not start')), 3000); })]);
+        if (phase === 'pending-revocation') user('I revoke the write authorization. Do not write.');
+        else controller.abort(new Error('fixture user cancelled'));
+        release();
+      }
+      const result = await pending;
+      assert.equal(existsSync(target), phase === 'unchanged', phase);
+      if (phase !== 'unchanged') assert.equal(result.isError, true, phase);
+    } finally { clearTimeout(timer); release?.(); authorizationHook = undefined; await close(fresh); }
+  }
+  authorizationProbability = .1;
+  console.log('ok native allowed-write control, in-flight/downstream revocation and user cancellation: stale writes never execute');
   const reuse = await host('reuse'); await turn(reuse, 'package.json 中的依赖是什么？');
   const afterFirst = httpCalls;
   await turn(reuse, 'package.json 中的项目名称是什么？');

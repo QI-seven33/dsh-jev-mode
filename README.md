@@ -1,5 +1,7 @@
 # JEV decision mode for DeepSeek Harness Desktop
 
+> Version 0.4.3 is a reliability and UI patch. It rejects malformed approvals, bounds credential/queue waits, isolates user cancellation and invalidates stale authorization snapshots. No new skill-selection feature or model/threshold change. See [release validation](VALIDATION.md).
+
 [中文说明](README.zh.md) · [Installation](INSTALL.zh.md) · [Validation and measurements](VALIDATION.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases)
 
 An optional preset that combines the standard Desktop tool capabilities with deterministic project reads, bounded JEV semantic selection, and a separate authorization gate. Independently developed and maintained by QI-seven33; this is an unofficial community plugin.
@@ -9,10 +11,10 @@ An optional preset that combines the standard Desktop tool capabilities with det
 In Harness Desktop, open **Plugins**, install and enable:
 
 ```text
-github:QI-seven33/dsh-jev-mode#v0.4.2
+github:QI-seven33/dsh-jev-mode#v0.4.3
 ```
 
-Alternatively, download [dsh-jev-mode-0.4.2.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.2/dsh-jev-mode-0.4.2.tgz) and enter its absolute local path in the same installer. Restart Harness completely, then choose **JEV decision mode** in a new session. Cloning the repository alone does not activate the plugin.
+Alternatively, download [dsh-jev-mode-0.4.3.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.3/dsh-jev-mode-0.4.3.tgz) and enter its absolute local path in the same installer. Restart Harness completely, then choose **JEV decision mode** in a new session. Cloning the repository alone does not activate the plugin.
 
 Tested against **DeepSeek Harness Desktop 0.2.0-rc.2**. Other host versions and operating systems need separate validation. Ready-to-run JavaScript is included; there are no runtime dependencies or build/install lifecycle scripts.
 
@@ -43,7 +45,7 @@ The system prompt section and complete tool catalog remain fixed within a sessio
 
 ## Evidence and limits
 
-The decision implementation is unchanged from 0.4.0; 0.4.2 adds desktop credential UI and separates global settings from preset behavior. The earlier controlled standard-vs-hybrid comparison achieved 28/28 scripted task successes in both arms and fewer main-model requests, but JEV-mode P95 was worse. These are small local measurements, not universal speed or accuracy claims. See [VALIDATION.md](VALIDATION.md) for exact scope.
+The selection/authorization policy remains the 0.4.0 design. Version 0.4.3 hardens execution boundaries and aligns desktop UI; it does not introduce new automatic decisions. The earlier controlled standard-vs-hybrid comparison achieved 28/28 scripted task successes in both arms and fewer main-model requests, but JEV-mode P95 was worse. These are small local measurements, not universal speed or accuracy claims. See [VALIDATION.md](VALIDATION.md) for exact scope.
 
 Authorization thresholds 0.85 / 0.55 have not been calibrated for this domain. Real-world false-allow/false-block rates are unmeasured. An automatic grounded/sufficient verification loop and per-decision client badges are not shipped.
 
@@ -59,3 +61,5 @@ Native-host checks require Node 24 and the host module locations via `DSH_HOST_N
 [Acceptance steps](ACCEPTANCE.zh.md) · [Source attribution](PROVENANCE.md) · [Release procedure](RELEASING.md)
 
 MIT License · Copyright 2026 QI-seven33.
+
+The command classifier has known gaps; a low risk label is not evidence of safety. See the concrete command variants and boundaries in [VALIDATION.md](VALIDATION.md).

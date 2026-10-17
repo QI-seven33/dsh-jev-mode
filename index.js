@@ -56,7 +56,7 @@ export const name = 'jev-mode';
 export const inject = ['llm', 'tools', 'systemPrompt'];
 
 /** Plugin version, stamped into ledger rows so a schema change is visible. */
-const PLUGIN_VERSION = '0.4.2';
+const PLUGIN_VERSION = '0.4.3';
 
 /**
  * Fixed prompt-section order.
@@ -334,9 +334,9 @@ export function apply(ctx, rawConfig) {
   // With no key, `auto` is exactly what it was: the session route, no credential
   // needed.
   //
-  // An explicitly pinned backend goes first and keeps the others as fallbacks, so a
-  // missing key degrades the mode rather than disabling it. The ledger records the
-  // engine that actually answered, so a fallback is auditable rather than silent.
+  // A pinned backend stays pinned. Missing credentials return unavailable:
+  // semantic reads fall back to ordinary planning and risky actions ask/deny.
+  // Only auto considers all engines; the ledger records the one that answered.
   const orderedByBackend = {
     model: [modelEngine],
     typesafe: [typesafeEngine],
@@ -345,18 +345,9 @@ export function apply(ctx, rawConfig) {
   };
   const ordered = (orderedByBackend[config.backend] ?? orderedByBackend.auto).filter(Boolean);
 
-  if (config.backend === 'typesafe' && !typesafeEngine.available()) {
-    logger?.warn?.(
-      'dsh-jev-mode: backend is pinned to typesafe but no key resolved; set %s (or typesafe.apiKey). Falling back, and every ledger row will name the engine that answered.',
-      config.typesafe.apiKeyEnv,
-    );
-  }
-  if (config.backend === 'openrouter' && !openrouterEngine.available()) {
-    logger?.warn?.(
-      'dsh-jev-mode: backend is pinned to openrouter but no key resolved; set %s. Falling back.',
-      config.openrouter.apiKeyEnv,
-    );
-  }
+  // Availability can be asynchronous. The pipeline handles rejected credential
+  // lookups; a boolean startup probe would leak an unhandled rejection and
+  // incorrectly promise a fallback for a pinned backend.
 
   const pipeline = createDecisionPipeline({ config, engines: ordered, logger, rubricVersion: RUBRIC_VERSION });
   const gate = createGate({ config, decide: pipeline.decide, ledger, logger });
@@ -719,7 +710,7 @@ export function apply(ctx, rawConfig) {
       'tools/pre-execute',
       async (exec, next) => {
         // Read live abort state across awaits without trusting stale narrowing.
-        const isAborted = () => lifecycle.signal.aborted;
+        const isAborted = () => lifecycle.signal.aborted || exec.signal?.aborted === true;
         try {
           if (!accepting || isAborted()) return { kind: 'cancel' };
           const agent = exec?.agent;
@@ -777,7 +768,16 @@ export function apply(ctx, rawConfig) {
             ticket.resolve();
           }
 
-          if (decision.verdict === 'allow') return next();
+          if (decision.verdict === 'allow') {
+            const downstream = await next();
+            if (isAborted()) return { kind: 'cancel' };
+            if (downstream.kind !== 'allow') return downstream;
+            if (!gate.isCurrent(decision, { exec, session })) {
+              return { kind: config.onGateFailure === 'deny' || safeOverride(ctx.get('approval'), session) === 'never' ? 'deny' : 'ask',
+                reason: 'Authorization context changed while checking downstream permissions; explicit approval is required' };
+            }
+            return downstream;
+          }
 
           // Delegate first: a later listener's deny, cancel or ask owns its own
           // reason and must take precedence over this one.
