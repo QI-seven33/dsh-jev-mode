@@ -1,3 +1,12 @@
+# 0.4.4 candidate (unreleased)
+
+- Fit HTTP retry waits within the existing decision deadline. Honor server Retry-After seconds/HTTP-date and retry-after-ms without the old five-second truncation; stop promptly when a retry cannot fit. Add jitter only to local backoff.
+- Share explicit 429/503 cooldown within each HTTP engine instance. Following calls return unavailable without another HTTP request; skipped calls do not add provider-health failures or strand half-open probes. Authorization still asks/denies.
+- Bound the sending stage's second credential lookup and consume late completion without sending a request. Contain synchronous startup lookup failures as well as asynchronous ones.
+- Record numeric HTTP request/retry/wait/skip counts in metadata-only ledger rows, including degraded decisions. Cache hits report zero new HTTP work.
+- Add 14 transport regressions, native rate-limit ask/deny write checks, and an immutable-v0.4.3 loopback fault comparison. Three synthetic live calls to pinned jev-1.13.0 succeeded; no end-to-end speed or safety-accuracy claim.
+- Main-model static prompt/tool schemas, authorization thresholds, model defaults, native permission ownership and desktop installation are unchanged. See reports/2026-10-17-transport-budget.zh.md. This candidate has not been published.
+
 # 0.4.3 (2026-10-17)
 
 - Match the native Models provider-row padding, title typography, status dot and compact Edit control. Browser comparisons cover 100/125/150/200 percent zoom and host theme tokens; credential-modal behavior is retained.

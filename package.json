@@ -1,6 +1,6 @@
 {
   "name": "dsh-jev-mode",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "description": "DeepSeek Harness Desktop plugin: deterministic project reads, optional bounded semantic selection, and a separate authorization gate with fixed prompt/tool prefixes.",
   "keywords": [
     "dsh",
@@ -55,7 +55,7 @@
     "yaml": "^2.6.0"
   },
   "scripts": {
-    "test": "node test/no-credentials.mjs && node test/manifest.test.mjs && node test/validate-patch.mjs && node test/boot.test.mjs && node test/decision.test.mjs && node test/transport.test.mjs && node test/repair.test.mjs && node test/persistence.test.mjs && node test/controlled.test.mjs && node test/selection.test.mjs && node test/settings.test.mjs && node --test test/hardening.test.mjs",
+    "test": "node test/no-credentials.mjs && node test/manifest.test.mjs && node test/validate-patch.mjs && node test/boot.test.mjs && node test/decision.test.mjs && node test/transport.test.mjs && node test/repair.test.mjs && node test/persistence.test.mjs && node test/controlled.test.mjs && node test/selection.test.mjs && node test/settings.test.mjs && node --test test/hardening.test.mjs test/retry-budget.test.mjs",
     "test:controlled": "node test/controlled.test.mjs",
     "bench:compare": "node bench/compare.mjs",
     "test:persistence": "node test/persistence.test.mjs",
@@ -68,7 +68,8 @@
     "bench": "node bench/bench.mjs",
     "bench:cache": "node bench/cache-probe.mjs",
     "test:selection": "node test/selection.test.mjs",
-    "test:hardening": "node --test test/hardening.test.mjs"
+    "test:hardening": "node --test test/hardening.test.mjs",
+    "test:retry-budget": "node --test test/retry-budget.test.mjs"
   },
   "dsh": {
     "bundle": {

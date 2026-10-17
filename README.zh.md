@@ -1,6 +1,6 @@
 # DeepSeek Harness 桌面版 JEV 决策模式
 
-> 当前版本 0.4.3：原生尺寸 UI 与可靠性修复。新增异常概率拒绝、取消隔离、凭据/排队期限及过期授权失效检查；不新增技能选择，不变更模型或阈值。详见 [发布验证](VALIDATION.md)。
+> 已发布稳定版仍为 0.4.3。本开发分支为未发布的 0.4.4 传输候选：重试遵守剩余期限、同一后端实例共享服务端冷却、限制发送阶段的凭据等待。模型、阈值和主模型固定前缀保持不变。详见 [验证边界](VALIDATION.md) 与 [本轮开发报告](reports/2026-10-17-transport-budget.zh.md)。
 
 由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.3)
 

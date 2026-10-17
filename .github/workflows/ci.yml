@@ -73,6 +73,9 @@ jobs:
       - name: Audit hardening regressions
         run: node --test test/hardening.test.mjs
 
+      - name: Retry deadline and provider cooldown regressions
+        run: node --test test/retry-budget.test.mjs
+
       - name: Credential settings contracts
         run: node test/settings.test.mjs
 

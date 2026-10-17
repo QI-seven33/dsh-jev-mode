@@ -56,7 +56,7 @@ export const name = 'jev-mode';
 export const inject = ['llm', 'tools', 'systemPrompt'];
 
 /** Plugin version, stamped into ledger rows so a schema change is visible. */
-const PLUGIN_VERSION = '0.4.3';
+const PLUGIN_VERSION = '0.4.4';
 
 /**
  * Fixed prompt-section order.
@@ -440,7 +440,7 @@ export function apply(ctx, rawConfig) {
     });
 
     if (outcome.ok !== true) {
-      await ledger.recordDegraded({ sessionId: session?.id, channel, reason: outcome.reason ?? 'decision unavailable' });
+      await ledger.recordDegraded({ sessionId: session?.id, channel, reason: outcome.reason ?? 'decision unavailable', transport: outcome.transport });
       // `compact` matters: a tool result is validated against `output.schema`
       // with `additionalProperties: false`, and an own property whose value is
       // `undefined` is still a property, so it fails the type check rather than
@@ -492,6 +492,7 @@ export function apply(ctx, rawConfig) {
       cached: outcome.cached === true,
       action: state,
       rubricVersion: RUBRIC_VERSION,
+      transport: outcome.transport,
     });
 
     return compact({

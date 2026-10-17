@@ -1,5 +1,15 @@
 # Validation and measurement boundaries
 
+## Unreleased 0.4.4 transport candidate
+
+Fourteen new transport tests cover server retry delays (seconds, HTTP-date and retry-after-ms), budget refusal, instance-local cooldown, concurrent extension and expiry, cancellation, the second credential lookup, secret-safe failures, half-open recovery, authorization degradation, advisory-cache accounting and numeric-only ledger metadata. Native Desktop 0.2.0-rc.2 regressions additionally refused four rate-limited protected writes under escalate/deny, with one HTTP request per two attempts. Existing allowed-write, revocation/cancellation, V4 none/zstd and retained prefix/tool-catalog checks pass. All three protocol variants and the public catalog also match v0.4.3 byte for byte. The candidate package installs through native PluginManager in a fresh isolated profile; no personal profile or credentials are used. No new-host compatibility or public 0.4.4 transport claim is made.
+
+An interleaved loopback comparison against immutable v0.4.3 used eight pairs with a 429 response, Retry-After: 30 and a 250ms decision deadline. Median time to unavailable was 259.75ms vs 1.65ms; observed P95 was 264.7ms vs 4ms. Both arms returned unavailable in all eight cases. A five-call sequential burst sent five HTTP requests in v0.4.3 and one in the candidate. This deliberately injected fault demonstrates prompt degradation and backpressure, not task completion speed, production P95 or improved authorization accuracy. Reproduce with `node bench/transport-budget.mjs`; it calls loopback only.
+
+Three synthetic live Noul calls to pinned jev-1.13.0 succeeded, with the response model matching the requested version: 536/418/237ms, 1,166 total input tokens and 60 output tokens, no retries. These are connectivity observations, with no live baseline or statistical inference. Credentials were resolved through the host service in memory; legacy migration was disabled and no credentials were written or exported.
+
+Cooldown is local to one HTTP engine instance and shared across its channels/sessions; it is not organization-wide coordination or a persistent cache. Only explicit server delays on 429/503 create shared cooldown. A following call degrades immediately even if its individual deadline could outlast the remaining cooldown. This can cause more ordinary-planning fallbacks or approval prompts during provider throttling; it never grants permission. Already in-flight requests cannot be recalled. Main-model prefix bytes, public tool schemas and authorization policy remain unchanged. The ledger still waits on filesystem writes; this candidate does not remove that known latency boundary. See [the development report](reports/2026-10-17-transport-budget.zh.md).
+
 ## Version 0.4.3 and known classifier limits
 
 Version 0.4.3 changes UI metrics and decision-boundary reliability; it adds no skill-selection feature, changes no authorization threshold, and does not establish new live performance or safety-accuracy results. See [the audit](reports/2026-10-17-update.zh.md) and [the follow-up review](reports/2026-10-17-followup.zh.md).

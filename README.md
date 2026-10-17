@@ -1,6 +1,6 @@
 # JEV decision mode for DeepSeek Harness Desktop
 
-> Version 0.4.3 is a reliability and UI patch. It rejects malformed approvals, bounds credential/queue waits, isolates user cancellation and invalidates stale authorization snapshots. No new skill-selection feature or model/threshold change. See [release validation](VALIDATION.md).
+> Published stable: 0.4.3. This development branch contains an unreleased 0.4.4 transport candidate: deadline-aware retries, instance-local server cooldown and bounded sending-stage credential resolution. Model defaults, authorization thresholds and static main-model prefixes are unchanged. See [validation](VALIDATION.md) and the [development report](reports/2026-10-17-transport-budget.zh.md).
 
 [中文说明](README.zh.md) · [Installation](INSTALL.zh.md) · [Validation and measurements](VALIDATION.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases)
 
