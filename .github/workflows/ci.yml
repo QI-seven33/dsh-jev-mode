@@ -67,6 +67,9 @@ jobs:
       - name: Native controlled-flow regression (requires installed host)
         run: node test/controlled.test.mjs
 
+      - name: Native DeepSeek thinking and wire regression (requires installed host)
+        run: node test/deepseek.test.mjs
+
       - name: Deterministic-first selection and failure policy
         run: node test/selection.test.mjs
 
@@ -75,6 +78,9 @@ jobs:
 
       - name: Retry deadline and provider cooldown regressions
         run: node --test test/retry-budget.test.mjs
+
+      - name: Content-free reasoning and latency metrics
+        run: node --test test/stream-metrics.test.mjs
 
       - name: Credential settings contracts
         run: node test/settings.test.mjs

@@ -10,6 +10,10 @@ if (!argv.includes('--live')) { console.log('Use --live [--repeats=3] [--only=ma
 const arg = (key, fallback) => argv.find(a => a.startsWith(`--${key}=`))?.slice(key.length + 3) ?? fallback;
 const repeats = Number(arg('repeats', '3'));
 if (!Number.isInteger(repeats) || repeats < 1 || repeats > 20) throw Error('repeats must be 1..20');
+const maxMainRequests = Number(arg('max-main-requests', '12'));
+const maxOutputTokens = Number(arg('max-output-tokens', '4096'));
+if (!Number.isInteger(maxMainRequests) || maxMainRequests < 1 || maxMainRequests > 12) throw Error('max-main-requests must be 1..12');
+if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 512 || maxOutputTokens > 4096) throw Error('max-output-tokens must be 512..4096');
 const base = process.env.DSH_HOST_NODE_MODULES ?? 'E:/SOME_SEVEN_PROJECT-57/_recon/asar/dsh/node_modules';
 const root = path.resolve(arg('output', './bench/results/standard-vs-hybrid'));
 const cwd = path.join(root, 'project'), artifacts = path.join(root, 'artifacts');
@@ -75,16 +79,17 @@ for (const [index, entry] of schedule.entries()) {
   const key = `${runId}-${index}-${arm}-${task.id}-${rep}`;
   const traceFile = path.join(artifacts, `${key}.trace.jsonl`); await writeFile(traceFile, '');
   const additionsForRun = [...additions, { id: 'jev-benchmark-observer', name: new URL('./observer.js', import.meta.url).href,
-    config: { traceFile, cwd, allowedFiles } }];
+    config: { traceFile, cwd, allowedFiles, maxMainRequests } }];
   if (arm === 'jev') additionsForRun.push({ id: 'jev-benchmark-mode', name: new URL('../index.js', import.meta.url).href,
     config: { backend: 'typesafe', autoRoute: false, controlledFlow: true, controlledThreshold: .9, protocol: 'focused', statusContext: false, semanticReads: true, ledgerDir } });
   const patch = [...shared, { id: 'system-prompt', config: { personaPrefix: '', personaSuffix: '' } },
     { id: 'credentials', config: { path: process.env.JEV_CREDENTIAL_FILE ?? path.join(os.homedir(), '.dsh', '.credentials.yaml'), watch: false } },
-    { id: 'deepseek-account', config: { desktopPlatform: process.platform === 'win32' ? 'win32' : null } },
+    { id: 'deepseek-account', config: { desktopPlatform: process.platform === 'win32' ? 'win32' : null,
+      ...(argv.includes('--no-provider-retries') ? { retryPolicy: { mode: 'normal', maxRetries: 0 } } : {}) } },
     { id: 'approval', config: { policy: 'never' } }, { id: 'sandbox-policy', config: { mode: 'danger-full-access', workspaceRoot: cwd } },
     { insert: additionsForRun }];
   const patchFile = path.join(artifacts, `${key}.patch.yml`); await writeFile(patchFile, yaml.dump(patch, { schema, noRefs: true, lineWidth: -1 }));
-  const harness = new DeepSeekHarness({ ...route, maxTokens: 4096,
+  const harness = new DeepSeekHarness({ ...route, maxTokens: maxOutputTokens,
     dshBin: process.env.DSH_BIN ?? path.join(base, '@deepseek-ai/dsh/lib/bin.js'), dshHome: path.join(artifacts, `${key}-home`),
     profile: 'sdk', patches: [patchFile], cwd, processCwd: cwd,
     env: { ...process.env, NODE_OPTIONS: `${process.env.NODE_OPTIONS ?? ''} --import=${new URL('./native-loader.mjs', import.meta.url).href}` },
@@ -117,6 +122,10 @@ for (const [index, entry] of schedule.entries()) {
   decisions = decisions.slice(warmDecisionCount);
   const row = { index, task: task.id, rep, arm, warm: argv.includes('--warm'), ms: ms ?? null, success,
     mainRequests: trace.filter(r=>r.kind==='main').length,
+    mainReasoningChars: trace.filter(r=>r.kind==='main').reduce((n,r)=>n+(r.reasoningChars??0),0),
+    firstOutputMs: trace.filter(r=>r.kind==='main').map(r=>r.firstOutputMs),
+    firstTextMs: trace.filter(r=>r.kind==='main').map(r=>r.firstTextMs),
+    firstToolCallMs: trace.filter(r=>r.kind==='main').map(r=>r.firstToolCallMs),
     codeSelections: decisions.filter(r=>r.kind==='selection' && r.selector==='code').length,
     semanticSelections: decisions.filter(r=>r.kind==='selection' && r.selector==='semantic').length,
     selectionFallbacks: decisions.filter(r=>r.kind==='selection' && r.executedAction==='none').length,
@@ -157,12 +166,16 @@ for (const arm of ['standard','jev']) {
     prefixViolations: data.filter(r=>!r.prefixPreserved||!r.toolsStable).length,
     unsafeBodiesExecuted: data.reduce((n,r)=>n+r.unsafeBodiesExecuted,0) };
 }
-const report = { runId, version:'0.4.0', protocol:'focused', route, carrier: 'official SDK; restated shipped standard capability rows', standardSourceHash: createHash('sha256').update(standardSource).digest('hex').slice(0,32),
+const version = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
+const report = { runId, version, protocol:'focused', route, actualServerModelRevision: null, maxMainRequests, maxOutputTokens,
+  providerRetriesDisabled: argv.includes('--no-provider-retries'),
+  carrier: 'official SDK; restated shipped standard capability rows', standardSourceHash: createHash('sha256').update(standardSource).digest('hex').slice(0,32),
   taskCount: tasks.length, repeats, warm: argv.includes('--warm'), summary, rows,
   limitations: ['Both arms use native danger-full-access, matching the supplied desktop screenshot, plus the same strict benchmark-only read/search/file-edit boundary. All shell/network/delete tool bodies are stubbed.',
     'JEV tool catalog adds three fixed tools; never cropped per turn. SDK carrier is isolated from desktop UI.',
     'Cache rates are per provider usage; fresh sessions and warm sessions must not be pooled.',
     'Zero unsafe executed bodies validates the test boundary, not a production safety rate.',
     'No provider price conversion; actual main and JEV token counts are reported separately.',
+    'Reasoning chars are UTF-16 character counts, not tokens. Output usage may include reasoning; the carrier does not expose a separate reasoning-token count or actual backend model revision.',
     'Code-edit grader accepts a bounded canonical function; it may reject a different valid implementation.'] };
 await writeFile(path.join(root, `${runId}-report.json`), JSON.stringify(report,null,2)); console.log(JSON.stringify({ runId, summary },null,2));

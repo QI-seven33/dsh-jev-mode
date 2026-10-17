@@ -1,11 +1,14 @@
-# 0.4.4 candidate (unreleased)
+# 0.4.4 (2026-10-17)
 
 - Fit HTTP retry waits within the existing decision deadline. Honor server Retry-After seconds/HTTP-date and retry-after-ms without the old five-second truncation; stop promptly when a retry cannot fit. Add jitter only to local backoff.
 - Share explicit 429/503 cooldown within each HTTP engine instance. Following calls return unavailable without another HTTP request; skipped calls do not add provider-health failures or strand half-open probes. Authorization still asks/denies.
 - Bound the sending stage's second credential lookup and consume late completion without sending a request. Contain synchronous startup lookup failures as well as asynchronous ones.
 - Record numeric HTTP request/retry/wait/skip counts in metadata-only ledger rows, including degraded decisions. Cache hits report zero new HTTP work.
 - Add 14 transport regressions, native rate-limit ask/deny write checks, and an immutable-v0.4.3 loopback fault comparison. Three synthetic live calls to pinned jev-1.13.0 succeeded; no end-to-end speed or safety-accuracy claim.
-- Main-model static prompt/tool schemas, authorization thresholds, model defaults, native permission ownership and desktop installation are unchanged. See reports/2026-10-17-transport-budget.zh.md. This candidate has not been published.
+- Fix auxiliary model requests freezing AbortSignal, which broke native DeepSeek signal composition. Request data remains immutable; cancellation capabilities remain live.
+- Verify native DeepSeek thinking signatures/history, request-local auxiliary thinking-off, SSE keep-alives and V4 reasoning persistence. Add content-free reasoning/latency benchmark counters and bounded live-run controls; correct the hardcoded benchmark report version.
+- Four small live DeepSeek task executions passed (eight main-model requests, zero JEV requests). This is a limited deterministic-read smoke, not new general performance evidence. See reports/2026-10-17-deepseek.zh.md.
+- Main-model static prompt/tool schemas, authorization thresholds, model defaults and native permission ownership are unchanged. See reports/2026-10-17-transport-budget.zh.md for the earlier candidate and measurement limits.
 
 # 0.4.3 (2026-10-17)
 

@@ -1,13 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeAnswer, verdictFor } from '../lib/channels.js';
-import { createBreaker, createLimiter, createDecisionPipeline } from '../lib/engine.js';
+import { createBreaker, createLimiter, createDecisionPipeline, createModelEngine } from '../lib/engine.js';
 import { createGate } from '../lib/gate.js';
 import { normalizeConfig } from '../index.js';
 import { execFileSync } from 'node:child_process';
 
 const malformed = [1.5, -0.1, '1', true, false, null, undefined, Infinity, NaN, {}, []];
 const cuts = { threshold: .85, askBand: .55 };
+test('auxiliary request immutability leaves AbortSignal compatible with native composition', async () => {
+  const controller = new AbortController();
+  let request, combined;
+  const engine = createModelEngine({ config: normalizeConfig({}), ctx: { llm: { stream(options) {
+    request = options;
+    combined = typeof AbortSignal.any === 'function' ? AbortSignal.any([options.signal]) : options.signal;
+    return (async function* () { yield { type: 'text-delta', text: '{"answers":{"grounded":{"noul":0.9}}}' };
+      yield { type: 'finish', reason: { kind: 'stop' } }; })();
+  } } } });
+  await engine.ask({ channel: 'grounded', state: 'synthetic', signal: controller.signal,
+    agent: { options: { provider: 'synthetic', model: 'synthetic' } } });
+  assert.ok(Object.isFrozen(request)); assert.ok(Object.isFrozen(request.messages));
+  assert.ok(Object.isFrozen(request.messages[0].content[0])); assert.equal(Object.isFrozen(controller.signal), false);
+  controller.abort(); assert.equal(combined.aborted, true);
+});
+
 test('credential service rejection cannot crash plugin startup', () => {
   const code = `import {apply} from ${JSON.stringify(new URL('../index.js', import.meta.url).href)};
     const ctx={logger:{info(){},warn(){}},effect(fn){const v=fn();if(v?.[Symbol.iterator])[...v];},

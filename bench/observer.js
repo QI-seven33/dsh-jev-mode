@@ -3,6 +3,7 @@
 import { appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { streamMetrics } from './stream-metrics.mjs';
 export const name = 'jev-benchmark-observer';
 export const inject = ['tools', 'llm', 'subprocess'];
 const hash = v => createHash('sha256').update(JSON.stringify(v)).digest('hex').slice(0, 32);
@@ -17,21 +18,25 @@ export function apply(ctx, config) {
   let writes = Promise.resolve();
   const record = row => { writes = writes.then(() => appendFile(config.traceFile, `${JSON.stringify(row)}\n`)); return writes; };
   ctx.on('llm/stream', (options, next) => (async function* () {
-    if (++calls > 12) throw Error('benchmark main-model call bound exceeded');
+    if (++calls > (config.maxMainRequests ?? 12)) throw Error('benchmark main-model call bound exceeded');
     const started = Date.now();
+    const metrics = streamMetrics();
     const prefixPreserved = previous ? hash(options.messages.slice(0, previous.messages.length)) === hash(previous.messages) : null;
     const toolsUnchanged = previous ? hash(options.tools) === hash(previous.tools) : null;
     previous = { messages: options.messages, tools: options.tools };
     let usage, finish;
     try {
       for await (const chunk of next()) {
+        metrics.accept(chunk);
         if (chunk.type === 'usage') usage = chunk.usage;
         if (chunk.type === 'finish') finish = chunk.reason?.kind;
         yield chunk;
       }
     } finally {
       await record({ kind: 'main', ms: Date.now() - started, toolsHash: hash(options.tools), prefixPreserved, toolsUnchanged,
-        usage: usage ?? null, finish: finish ?? 'failed' });
+        requestedModel: options.model, requestedEffort: options.reasoningEffort ?? null,
+        historyReasoningChars: options.messages.reduce((sum, message) => sum + message.content.filter(block => block.type === 'reasoning').reduce((n, block) => n + block.text.length, 0), 0),
+        ...metrics.snapshot(), usage: usage ?? null, finish: finish ?? 'failed' });
     }
   })());
   const paths = new Set(config.allowedFiles.map(p => path.resolve(config.cwd, p).toLowerCase()));

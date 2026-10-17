@@ -1,6 +1,6 @@
 # JEV decision mode for DeepSeek Harness Desktop
 
-> Published stable: 0.4.3. This development branch contains an unreleased 0.4.4 transport candidate: deadline-aware retries, instance-local server cooldown and bounded sending-stage credential resolution. Model defaults, authorization thresholds and static main-model prefixes are unchanged. See [validation](VALIDATION.md) and the [development report](reports/2026-10-17-transport-budget.zh.md).
+> Version 0.4.4 bounds HTTP retry waits, shares instance-local server cooldown and repairs auxiliary native DeepSeek signal composition. Model defaults, authorization thresholds and static main-model prefixes are unchanged. See [validation](VALIDATION.md), the [transport report](reports/2026-10-17-transport-budget.zh.md) and [DeepSeek-specific checks](reports/2026-10-17-deepseek.zh.md).
 
 [中文说明](README.zh.md) · [Installation](INSTALL.zh.md) · [Validation and measurements](VALIDATION.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases)
 
@@ -11,10 +11,10 @@ An optional preset that combines the standard Desktop tool capabilities with det
 In Harness Desktop, open **Plugins**, install and enable:
 
 ```text
-github:QI-seven33/dsh-jev-mode#v0.4.3
+github:QI-seven33/dsh-jev-mode#v0.4.4
 ```
 
-Alternatively, download [dsh-jev-mode-0.4.3.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.3/dsh-jev-mode-0.4.3.tgz) and enter its absolute local path in the same installer. Restart Harness completely, then choose **JEV decision mode** in a new session. Cloning the repository alone does not activate the plugin.
+Alternatively, download [dsh-jev-mode-0.4.4.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz) and enter its absolute local path in the same installer. Restart Harness completely, then choose **JEV decision mode** in a new session. Cloning the repository alone does not activate the plugin.
 
 Tested against **DeepSeek Harness Desktop 0.2.0-rc.2**. Other host versions and operating systems need separate validation. Ready-to-run JavaScript is included; there are no runtime dependencies or build/install lifecycle scripts.
 

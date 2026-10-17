@@ -1,8 +1,8 @@
 # DeepSeek Harness 桌面版 JEV 决策模式
 
-> 已发布稳定版仍为 0.4.3。本开发分支为未发布的 0.4.4 传输候选：重试遵守剩余期限、同一后端实例共享服务端冷却、限制发送阶段的凭据等待。模型、阈值和主模型固定前缀保持不变。详见 [验证边界](VALIDATION.md) 与 [本轮开发报告](reports/2026-10-17-transport-budget.zh.md)。
+> 当前版本 0.4.4：重试遵守剩余期限，同一后端实例共享服务端冷却，并修复原生 DeepSeek 辅助请求的取消信号冻结问题。模型、阈值和主模型固定前缀保持不变。详见 [验证边界](VALIDATION.md)、[传输报告](reports/2026-10-17-transport-budget.zh.md) 与 [DeepSeek 专项核对](reports/2026-10-17-deepseek.zh.md)。
 
-由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.3)
+由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.4)
 
 ![收起的设置卡片](assets/settings-card.png)
 
@@ -25,7 +25,7 @@
 
 ## 安装与更新
 
-面向其他用户的安装、启用与密钥录入步骤见 [INSTALL.zh.md](./INSTALL.zh.md)。在插件安装入口输入 `github:QI-seven33/dsh-jev-mode#v0.4.3` 并启用；也可安装 [Release 的 .tgz 附件](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.3)。仅克隆仓库不会自动加载插件。
+面向其他用户的安装、启用与密钥录入步骤见 [INSTALL.zh.md](./INSTALL.zh.md)。在插件安装入口输入 `github:QI-seven33/dsh-jev-mode#v0.4.4` 并启用；也可安装 [Release 的 .tgz 附件](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.4)。仅克隆仓库不会自动加载插件。
 
 桌面版通过应用内插件入口安装本包的目录或发布后的包；桌面 profile 由 Electron 管理，请勿直接套用 CLI profile 的安装命令。
 更新后需完全退出桌面版并重开，在新会话选择「JEV 决策模式」。

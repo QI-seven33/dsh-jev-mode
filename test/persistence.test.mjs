@@ -67,9 +67,12 @@ async function host(compression) {
     async resolveModel(provider, model) { return { provider, id: model, name: model, systemPromptUpdate: 'in-history', toolUpdate: 'in-history' }; }
     async *stream(options) {
       requests.push(options);
-      yield { type: 'block-start', index: 0, blockType: 'text' };
-      yield { type: 'text-delta', index: 0, text: 'done' };
-      yield { type: 'block-end', index: 0, block: { type: 'text', text: 'done' } };
+      yield { type: 'block-start', index: 0, blockType: 'reasoning' };
+      yield { type: 'reasoning-delta', index: 0, text: 'synthetic-persisted-reasoning' };
+      yield { type: 'block-end', index: 0, block: { type: 'reasoning', text: 'synthetic-persisted-reasoning' } };
+      yield { type: 'block-start', index: 1, blockType: 'text' };
+      yield { type: 'text-delta', index: 1, text: 'done' };
+      yield { type: 'block-end', index: 1, block: { type: 'text', text: 'done' } };
       yield { type: 'finish', reason: { kind: 'stop' } };
     }
   }
@@ -116,6 +119,7 @@ try {
     for (const e of before) catalog.sessionFormatCatalog.encodeCurrentEvent(e);
     assert.deepEqual(first.requests[1].messages.slice(0, first.requests[0].messages.length), first.requests[0].messages, 'old model-visible prefix changed');
     assert.deepEqual(first.requests[1].tools, first.requests[0].tools, 'tool catalog changed');
+    assert.ok(first.requests[1].messages.some(message => message.role === 'assistant' && message.content.some(block => block.type === 'reasoning' && block.text === 'synthetic-persisted-reasoning')));
     await close(first.ctx);
     const second = await host(compression);
     const reader = await second.ctx.sessionPersistence.open(id, 'read');
@@ -126,6 +130,7 @@ try {
     await turn(second.ctx, resumed.agent, 'Fix fixture C after reopening');
     assert.equal(second.requests.length, 1);
     assert.deepEqual(second.requests[0].messages.slice(0, first.requests[1].messages.length), first.requests[1].messages, 'reopening changed the previous model-visible prefix');
+    assert.equal(second.requests[0].messages.filter(message => message.role === 'assistant' && message.content.some(block => block.type === 'reasoning')).length, 2, 'cold reopen must retain reasoning from both completed turns');
     assert.equal(notices(resumed.agent.session.snapshotEvents()).length, 3);
     await close(second.ctx);
     const third = await host(compression);
