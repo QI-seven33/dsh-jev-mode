@@ -1,8 +1,27 @@
 # Validation and measurement boundaries
 
-## Current package: 0.4.2
+## Version 0.4.3 and known classifier limits
 
-The current release runs the 0.4.0 decision implementation. Changes in 0.4.1/0.4.2 concern credential settings, native-modal interactions, and separate global settings/preset loading.
+Version 0.4.3 changes UI metrics and decision-boundary reliability; it adds no skill-selection feature, changes no authorization threshold, and does not establish new live performance or safety-accuracy results. See [the audit](reports/2026-10-17-update.zh.md) and [the follow-up review](reports/2026-10-17-followup.zh.md).
+
+The regex classifier is incomplete. The following command strings classify at risk 1, below the default gate threshold, in the reviewed source:
+
+```text
+npm --prefix subproject publish
+git -C subproject push
+gh api --method POST repos/example/repo/releases
+python deploy.py
+```
+
+These were classified without executing commands. A low risk label is not evidence of safety or authorization. Keep native sandbox/path boundaries and approvals; the plugin does not inspect every dangerous operation. Unknown scripts can have effects that their command names do not reveal.
+
+The automatic authorization question is Noul, with no Choice criteria. `allow`, `ask` and `deny` are local threshold outcomes, not options sent to JEV. Choice option-order experiments apply to dispatch/routing and any future skill selector; authorization tests instead need instruction/revocation, scope, evidence completeness, repeatability and model-version controls.
+
+The two scripted follow-up findings were fixed before release: automatic approvals are invalidated when human history or execution arguments change during pending decision/ledger/downstream waits; user cancellations and queued expiry do not open the provider breaker. Credential lookup is deadline bounded. Twelve focused tests pass. Native-host tests include an authorized isolated write control and pending/downstream revocation and user cancellation cases; stale/cancelled writes did not execute. These tests use scripted responses, not real-model safety labels.
+
+## Package validation
+
+The selection and authorization policy remains the 0.4.0 design. The 0.4.3 implementation adds validation, cancellation and authorization-freshness guards; 0.4.1/0.4.2 introduced credential settings and split entry points. Existing historical performance results are not new 0.4.3 measurements.
 
 Verified locally against Desktop 0.2.0-rc.2: bundle installation in a fresh isolated profile through the native PluginManager; bundle enabling, composed preset, settings anchor and client-module discovery; native tool schema/permissions contracts; V4 persistence; secret scanning; transport/fallback, quoted-command, selection and credential-service regressions. Browser checks use actual host React/Modal and the real plugin component with stubbed remote credentials. They do not prove API connectivity or compatibility with every desktop release.
 

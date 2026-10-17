@@ -70,6 +70,9 @@ jobs:
       - name: Deterministic-first selection and failure policy
         run: node test/selection.test.mjs
 
+      - name: Audit hardening regressions
+        run: node --test test/hardening.test.mjs
+
       - name: Credential settings contracts
         run: node test/settings.test.mjs
 

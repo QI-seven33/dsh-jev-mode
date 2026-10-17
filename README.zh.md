@@ -1,6 +1,8 @@
 # DeepSeek Harness 桌面版 JEV 决策模式
 
-由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.2)
+> 当前版本 0.4.3：原生尺寸 UI 与可靠性修复。新增异常概率拒绝、取消隔离、凭据/排队期限及过期授权失效检查；不新增技能选择，不变更模型或阈值。详见 [发布验证](VALIDATION.md)。
+
+由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.3)
 
 ![收起的设置卡片](assets/settings-card.png)
 
@@ -8,9 +10,9 @@
 
 上图为实际宿主 React/Modal 组件测试预览，凭据远端使用测试桩，不是已登录桌面会话截图。
 
-0.4.2 在标准模式中增加按需语义判断。明确事情由代码处理，语义判断只在受控边界内补充。它不修改标准预设。
+本模式在标准能力组合上增加按需语义判断。明确事情由代码处理，语义判断只在受控边界内补充。它不修改标准预设。
 
-0.4.2 只新增模型设置页的凭据卡片及加载入口拆分；决策实现沿用 0.4.0。本次验证凭据读写、浏览器交互和原生回归，没有重新测量速度或安全准确率。
+0.4.3 对齐模型设置行尺寸，修复概率解析、熔断恢复、排队取消、凭据启动，以及授权等待/下游检查中的状态失效。本次通过离线和原生回归，没有重新测量真实任务速度或安全准确率。
 
 ## 做了什么
 
@@ -23,7 +25,7 @@
 
 ## 安装与更新
 
-面向其他用户的安装、启用与密钥录入步骤见 [INSTALL.zh.md](./INSTALL.zh.md)。在插件安装入口输入 `github:QI-seven33/dsh-jev-mode#v0.4.2` 并启用；也可安装 [Release 的 .tgz 附件](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.2)。仅克隆仓库不会自动加载插件。
+面向其他用户的安装、启用与密钥录入步骤见 [INSTALL.zh.md](./INSTALL.zh.md)。在插件安装入口输入 `github:QI-seven33/dsh-jev-mode#v0.4.3` 并启用；也可安装 [Release 的 .tgz 附件](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.3)。仅克隆仓库不会自动加载插件。
 
 桌面版通过应用内插件入口安装本包的目录或发布后的包；桌面 profile 由 Electron 管理，请勿直接套用 CLI profile 的安装命令。
 更新后需完全退出桌面版并重开，在新会话选择「JEV 决策模式」。
@@ -64,3 +66,5 @@
 本版控制流通过离线和原生回归验证；其他环境仍需要用户验收。网络抖动和回退仍可能增加总耗时，不保证更快或固定缓存命中率。
 
 开始验收请阅读 [ACCEPTANCE.zh.md](./ACCEPTANCE.zh.md)。发布步骤见 [RELEASING.md](./RELEASING.md)。
+
+命令分类器存在已知漏检，低风险标签不代表安全或已授权；具体命令变体与边界见 [VALIDATION.md](VALIDATION.md)。

@@ -1,3 +1,15 @@
+# 0.4.3 (2026-10-17)
+
+- Match the native Models provider-row padding, title typography, status dot and compact Edit control. Browser comparisons cover 100/125/150/200 percent zoom and host theme tokens; credential-modal behavior is retained.
+- Reject malformed Noul probabilities instead of coercing/clamping them into authorization decisions. Failed responses escalate or deny and cannot enter the advisory cache.
+- Reserve one half-open circuit-breaker probe during recovery.
+- Remove cancelled/expired decisions from the concurrency queue before calling the provider; pass the existing decision deadline to that queue.
+- Prevent an asynchronous credential lookup failure from becoming an unhandled startup rejection.
+- Isolate user cancellation and queued expiry from provider-health failures; release abandoned half-open probes without clearing failure history. Credential lookup now shares the decision deadline.
+- Bind automatic approvals to the current human history, execution arguments/call and working directory. Revalidate after decision/ledger waits and downstream permission checks; stale approvals ask/deny, cancelled executions stop.
+- Add 12 focused hardening tests plus native-host allowed-write, in-flight/downstream revocation and cancellation regressions.
+- Authorization thresholds, prompt sections, tool catalog and ordinary-task JEV coverage are unchanged. No new live end-to-end performance claim. No new feature, model migration or cache-policy rewrite is included.
+
 # 0.4.2
 
 - Collapse the JEV Models card to a provider row; Edit opens the host Modal with write-only credential controls. Closing clears unsaved input.
