@@ -1,70 +1,76 @@
-# DeepSeek Harness 桌面版 JEV 决策模式
+# DeepSeek Harness JEV 决策模式
 
-> 当前版本 0.4.4：重试遵守剩余期限，同一后端实例共享服务端冷却，并修复原生 DeepSeek 辅助请求的取消信号冻结问题。模型、阈值和主模型固定前缀保持不变。详见 [验证边界](VALIDATION.md)、[传输报告](reports/2026-10-17-transport-budget.zh.md) 与 [DeepSeek 专项核对](reports/2026-10-17-deepseek.zh.md)。
+[English](README.md) · [发布版本](https://github.com/QI-seven33/dsh-jev-mode/releases) · [验证与限制](VALIDATION.md) · [问题反馈](https://github.com/QI-seven33/dsh-jev-mode/issues)
 
-由 QI-seven33 独立开发和维护的非官方社区插件。[English](README.md) · [安装包](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.4)
+由 QI-seven33 独立维护的**非官方、可选桌面预设**。基于 DeepSeek Harness Desktop **0.2.0-rc.2** 的标准能力组合，增加有限的项目文件读取和 JEV 授权检查。主模型沿用你的配置，原有标准预设不变。
 
-![收起的设置卡片](assets/settings-card.png)
+**尚未证明通用提速或安全准确性提升。** 多轮实验未发现日常 Agent 任务的稳定收益；分类器存在漏检，真实授权误放行率、误拦率尚未测量。
 
-![点击编辑后的弹窗](assets/settings-dialog.png)
+## 安装
 
-上图为实际宿主 React/Modal 组件测试预览，凭据远端使用测试桩，不是已登录桌面会话截图。
+在 Harness 桌面版的「插件」页面安装并启用：
 
-本模式在标准能力组合上增加按需语义判断。明确事情由代码处理，语义判断只在受控边界内补充。它不修改标准预设。
+```text
+github:QI-seven33/dsh-jev-mode#v0.4.4
+```
 
-0.4.3 对齐模型设置行尺寸，修复概率解析、熔断恢复、排队取消、凭据启动，以及授权等待/下游检查中的状态失效。本次通过离线和原生回归，没有重新测量真实任务速度或安全准确率。
+也可在同一入口填写 [固定版本 .tgz 链接](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz)，或下载后填写绝对本地路径。源码 ZIP 不是插件安装包。
 
-## 做了什么
+完全退出并重启 Harness，在新会话选择「JEV 决策模式」。打开「设置 → 模型 → JEV 决策模型 → 编辑」，保存自己的 TypeSafe API 密钥。DeepSeek 主模型设置保持原样；状态点只表示已配置，不表示 API 连通。
 
-- 明确项目查询：代码选择根目录 package.json 或 README.md，经原生 read 和权限管线读取，不调用 JEV。
-- 有限歧义查询：只对短、只读、具有显式取舍语义且两个固定文件均可用的请求调用 JEV；有效返回且置信度/所选概率均至少 0.9 才执行固定读取。低置信度、缺少凭据或超时回退普通规划。
-- 危险授权闸门：硬规则先处理；风险 2+ 的剩余操作检查宿主中的真实用户指令历史。阈值仍为 0.85 / 0.55，尚未进行领域校准。结果不覆盖宿主权限或其他插件的拒绝。
-- 普通代码/文档任务走标准工具。写入正文中的命令引用不参与执行风险分类。不自动调用 route、risk、grounded 或 sufficient，也没有自动验证闭环。
-- 固定系统提示和完整工具目录，每会话只注册一次；检查结果以支持 V4 持久化的 producer-owned 通知追加至历史。默认不向主模型注入状态计数。
-- jev_status 显示版本、代码/JEV 尝试、回退、证据复用及耗时；台账只存元数据和哈希，不存动作正文、理由正文或密钥。
+无需运行时依赖或安装编译步骤。已验证环境为 **Desktop 0.2.0-rc.2、Windows**，其他宿主版本和系统需另行验证。详见 [安装说明](INSTALL.zh.md) 和 [验收步骤](ACCEPTANCE.zh.md)。
 
-## 安装与更新
+## 实际提供的能力
 
-面向其他用户的安装、启用与密钥录入步骤见 [INSTALL.zh.md](./INSTALL.zh.md)。在插件安装入口输入 `github:QI-seven33/dsh-jev-mode#v0.4.4` 并启用；也可安装 [Release 的 .tgz 附件](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.4)。仅克隆仓库不会自动加载插件。
+| 请求或操作 | 行为 |
+| --- | --- |
+| 明确询问根目录 `package.json` 或 `README.md` | 代码选择文件，经原生 read 和权限管线读取；不调用 JEV 选择。 |
+| 在上述两个文件之间作取舍的合格短请求 | 有限 JEV 选择；置信度、所选概率均须达到 0.9，否则回退普通规划。 |
+| 被分类为风险 2 及以上的操作 | 先执行硬规则，再由 JEV 检查用户授权；原生权限拒绝始终有效。 |
+| 普通代码、文档任务 | 标准规划与工具，不自动选技能、不做通用预读，也没有 grounded/sufficient 自动验证闭环。 |
 
-桌面版通过应用内插件入口安装本包的目录或发布后的包；桌面 profile 由 Electron 管理，请勿直接套用 CLI profile 的安装命令。
-更新后需完全退出桌面版并重开，在新会话选择「JEV 决策模式」。
-只支持已核对的 DSH 0.2.0-rc.2 标准预设组合；宿主更新后应重新核对组合和原生契约。
+`jev_status` 显示版本和计数。`jev_decide`、`jev_gate` 保留为用户明确要求时使用的诊断工具；诊断结果不是执行许可。
 
-打开「设置 → 模型」，滚动到页面底部的「JEV 决策模型」卡片，点击卡片右侧「编辑」，在弹窗里输入自己的 TypeSafe API 密钥并点击「保存密钥」。不需要在「自定义模型 API」里新增聊天模型。卡片支持更换、移除和刷新状态；只显示是否已配置，不回显保存的密钥，也不测试连通性。
+默认固定 **`jev-1.13.0`**。授权使用 **Noul**，阈值保持 **0.85 / 0.55**，`gateAtRisk: 2`。保留主模型历史、推理和工具定义；缓存命中不保证固定比例。
 
-密钥通过宿主 credentials 服务写入 TYPESAFE_API_KEY 引用。保存后后续 JEV 请求读取新凭据，无需因密钥变更重启。启动环境提供的密钥为只读；.env 的旧密钥可被凭据存储覆盖，移除已保存密钥后可能恢复 .env 来源。不要把值写进源码、提交或发布材料。
+没有 TypeSafe 密钥时：明确读取仍可用，语义读取回退，授权服务不可用时进入审批或拒绝。停止使用时选择标准预设；需要移除插件贡献时，在「插件」页面禁用。
 
-安装入口分成全局 settings.js（只使设置卡片可发现）和预设内 dsh-jev-mode/mode（原 index.js 的决策功能）。手动配置旧插件行时应将名称更新为 dsh-jev-mode/mode；通过本包补丁安装会自动采用新名称。
-桌面预设固定 backend: typesafe。缺少凭据时明确读取照常，语义读取回退，危险判断失败进入审批或拒绝。
-没有运行时依赖；yaml 是测试用开发依赖。
+## 0.4.4 的改动
 
-## 设置
+这是**可靠性修复版**：重试等待遵守决策期限，正确处理 `Retry-After`，同一后端实例共享服务端冷却，限制凭据查询等待，并修复辅助请求的取消信号冻结。用户取消不计为服务故障。保留 0.4.3 的紧凑设置卡片和原生编辑弹窗；维护者已反馈该 UI 工作正常。
 
-修改预设中的插件 config 后重启应用并开新会话：
+实验性 `/jev-json-set` 事务插件**不在发布包内**，其窄场景提速不能代表本版收益。具体改动见 [CHANGELOG.md](CHANGELOG.md)，测试、跳过项和测量边界见 [VALIDATION.md](VALIDATION.md)。
 
-| 配置 | 桌面默认 | 用途 |
-| --- | --- | --- |
-| controlledFlow | true | 开启有限前置原生读取 |
-| semanticReads | true | 歧义读取是否调用 JEV；false 为代码优先且歧义回退 |
-| autoRoute | false | 保留旧版显式调试选项，默认关闭 |
-| autoGate / gateAtRisk | true / 2 | 独立危险授权闸门 |
-| protocol | focused | 收紧自动决策提示；full/compact 仅为旧版兼容 |
-| statusContext | false | 状态默认只通过 jev_status 查看 |
-| onGateFailure | escalate | ask；deny 可选。旧 allow 值会迁移为 escalate |
-| ledger | true | 元数据台账；false 仅保留进程内计数 |
+## 安全与数据流向
 
-预设是可选模式。关掉插件不会关闭宿主权限策略。显式诊断工具仍可应用户请求调用，不应把诊断结果当成实际执行许可。
+- 闸门补充原生权限，不能替代沙箱或增加权限。`npm --prefix subproject publish`、`git -C subproject push` 等变体可能不触发 JEV；低风险标签不代表安全或已授权。
+- 语义检查会向 TypeSafe 发送有界上下文，例如相关请求、用户授权历史和拟执行动作。脱敏并非绝对保证，请勿在提示或命令参数中放入密钥；调用可能另行计费。
+- 密钥通过宿主 credentials 服务解析，保存的值不回显给浏览器或模型对话；不附带共享密钥。启动环境提供的密钥为只读，移除已保存密钥后可能恢复原有环境备用来源。
+- 本地台账保存元数据和哈希，不保存命令正文、判断理由正文或凭据。
 
-## 验证与证据边界
+## 设置与界面
 
-运行 npm test：参数/输出原生 schema、固定提示、授权来源、引用误拦、传输失败、原生读取和 V4 none/zstd 持久化等。
-原生回归要求 Node 24 及已安装宿主。其他机器通过 DSH_HOST_NODE_MODULES / DSH_HOST_NATIVE_NODE_MODULES 指定宿主路径。CI 中允许缺失宿主时跳过，跳过不是桌面兼容性证明。
-基准脚本只有带 --live 才请求真实服务，主模型与 JEV 用量分开统计。详细设置见 bench/COMPARE.md。
+默认配置包括 `controlledFlow: true`、`semanticReads: true`、`autoGate: true`、`onGateFailure: escalate`、`statusContext: false`。如不希望歧义读取调用 JEV，可在模式配置中设置 `semanticReads: false`。修改预设配置后重启并新建会话。
 
-之前的三组实验支持明确读取优先使用代码。随后 0.4.0 混合流程的标准模式对照包含 56 次执行，两组各 28/28 成功，中位耗时下降但 JEV 模式 P95 恶化。决策实现沿用至本版；这些小样本不证明全面提速或安全准确率提升。具体数据与边界见 [VALIDATION.md](./VALIDATION.md)。
-本版控制流通过离线和原生回归验证；其他环境仍需要用户验收。网络抖动和回退仍可能增加总耗时，不保证更快或固定缓存命中率。
+<details>
+<summary>查看设置界面预览</summary>
 
-开始验收请阅读 [ACCEPTANCE.zh.md](./ACCEPTANCE.zh.md)。发布步骤见 [RELEASING.md](./RELEASING.md)。
+下图使用实际宿主 React/Modal 和凭据测试桩，不是已登录桌面会话截图。
 
-命令分类器存在已知漏检，低风险标签不代表安全或已授权；具体命令变体与边界见 [VALIDATION.md](VALIDATION.md)。
+<p><img src="assets/settings-card.png" alt="紧凑的 JEV 模型设置卡片" width="360"></p>
+<p><img src="assets/settings-dialog.png" alt="JEV 密钥编辑弹窗" width="360"></p>
+
+</details>
+
+## 开发与反馈
+
+```sh
+npm install --no-save --no-package-lock yaml@2
+npm test
+```
+
+CI 执行 Node 20/22/24 离线检查。原生测试需要 Node 24，并通过 `DSH_HOST_NODE_MODULES` / `DSH_HOST_NATIVE_NODE_MODULES` 指定宿主路径；缺少宿主时跳过不代表桌面兼容。真实 API 检查需主动启用。
+
+反馈问题时请提供插件与宿主版本、系统、新旧会话情况及最小复现步骤，删除日志中的凭据和敏感内容。新功能研究已收口，不再计划让 JEV 介入更多普通任务。
+
+[来源与致谢](PROVENANCE.md) · [发布流程](RELEASING.md) · [MIT 许可证](LICENSE)

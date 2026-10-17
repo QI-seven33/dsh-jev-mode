@@ -2,6 +2,10 @@
 
 ## Version 0.4.4
 
+This release closes the reliability work only. It retains the compact settings card and native edit modal from 0.4.3; the maintainer reported those UI changes working normally. It does not introduce a new selector, preloading workflow, transaction command or general task-performance optimization. The separately retained `/jev-json-set` prototype is experimental, default-off and excluded from both the install package and release source snapshot. Its timing results do not describe 0.4.4.
+
+The production model remains pinned to `jev-1.13.0`, authorization remains Noul, and the authorization thresholds remain 0.85 / 0.55 with gateAtRisk=2. No model or threshold tuning is included. Research into additional JEV involvement in ordinary conversations, skill selection and preloading is stopped.
+
 Native DeepSeekAdapter loopback verification covers signed reasoning in both tool and non-tool historical turns, auxiliary thinking-off without changing the main high effort, plugin-notice serialization, unchanged prefix/tools/user isolation id, SSE keep-alives and an absolute deadline. V4 none/zstd cold reopen now also verifies reasoning retention. A new offline regression reproduces the AbortSignal freeze failure at the native signal-composition boundary; request data stays immutable after the repair. The node:test portion passes 29 tests, alongside the existing offline/native suites.
 
 A limited live DeepSeek smoke ran two read tasks once per arm: 4/4 passed, eight main-model requests total, zero JEV calls. Standard used six requests and the hybrid used two; this exercises existing deterministic reads, not the new JEV transport. Each arm has only two observations, so no general speed, P95, accuracy or calibration claim is made. Detailed absolute token counts, reasoning-metric limits and current DeepSeek protocol findings are in [the focused report](reports/2026-10-17-deepseek.zh.md).
@@ -14,11 +18,9 @@ Three synthetic live Noul calls to pinned jev-1.13.0 succeeded, with the respons
 
 Cooldown is local to one HTTP engine instance and shared across its channels/sessions; it is not organization-wide coordination or a persistent cache. Only explicit server delays on 429/503 create shared cooldown. A following call degrades immediately even if its individual deadline could outlast the remaining cooldown. This can cause more ordinary-planning fallbacks or approval prompts during provider throttling; it never grants permission. Already in-flight requests cannot be recalled. Main-model prefix bytes, public tool schemas and authorization policy remain unchanged. The ledger still waits on filesystem writes; this candidate does not remove that known latency boundary. See [the development report](reports/2026-10-17-transport-budget.zh.md).
 
-## Version 0.4.3 and known classifier limits
+## Known limitations retained in 0.4.4
 
-Version 0.4.3 changes UI metrics and decision-boundary reliability; it adds no skill-selection feature, changes no authorization threshold, and does not establish new live performance or safety-accuracy results. See [the audit](reports/2026-10-17-update.zh.md) and [the follow-up review](reports/2026-10-17-followup.zh.md).
-
-The regex classifier is incomplete. The following command strings classify at risk 1, below the default gate threshold, in the reviewed source:
+The regex classifier is incomplete. Rechecked on the retained 0.4.4 implementation, the following command strings classify at risk 1, below the default gate threshold of 2, and therefore do not trigger the automatic JEV authorization check:
 
 ```text
 npm --prefix subproject publish
@@ -29,9 +31,15 @@ python deploy.py
 
 These were classified without executing commands. A low risk label is not evidence of safety or authorization. Keep native sandbox/path boundaries and approvals; the plugin does not inspect every dangerous operation. Unknown scripts can have effects that their command names do not reveal.
 
+This is a gap in JEV-gate coverage, not evidence that native permissions were bypassed. Evaluating only actions that reached JEV would omit these cases. Production false-allow/false-block rates remain unmeasured; no safety-accuracy improvement is claimed. Classification and permission policy are deliberately unchanged in this maintenance release.
+
 The automatic authorization question is Noul, with no Choice criteria. `allow`, `ask` and `deny` are local threshold outcomes, not options sent to JEV. Choice option-order experiments apply to dispatch/routing and any future skill selector; authorization tests instead need instruction/revocation, scope, evidence completeness, repeatability and model-version controls.
 
-The two scripted follow-up findings were fixed before release: automatic approvals are invalidated when human history or execution arguments change during pending decision/ledger/downstream waits; user cancellations and queued expiry do not open the provider breaker. Credential lookup is deadline bounded. Twelve focused tests pass. Native-host tests include an authorized isolated write control and pending/downstream revocation and user cancellation cases; stale/cancelled writes did not execute. These tests use scripted responses, not real-model safety labels.
+## Retained 0.4.3 validation
+
+Version 0.4.3 changes UI metrics and decision-boundary reliability; it adds no skill-selection feature, changes no authorization threshold, and does not establish new live performance or safety-accuracy results. See [the audit](reports/2026-10-17-update.zh.md) and [the follow-up review](reports/2026-10-17-followup.zh.md).
+
+The two scripted follow-up findings were fixed before that release: automatic approvals are invalidated when human history or execution arguments change during pending decision/ledger/downstream waits; user cancellations and queued expiry do not open the provider breaker. Credential lookup is deadline bounded. Twelve focused tests pass. Native-host tests include an authorized isolated write control and pending/downstream revocation and user cancellation cases; stale/cancelled writes did not execute. These tests use scripted responses, not real-model safety labels.
 
 ## Package validation
 

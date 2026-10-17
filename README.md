@@ -1,65 +1,76 @@
-# JEV decision mode for DeepSeek Harness Desktop
+# JEV decision mode for DeepSeek Harness
 
-> Version 0.4.4 bounds HTTP retry waits, shares instance-local server cooldown and repairs auxiliary native DeepSeek signal composition. Model defaults, authorization thresholds and static main-model prefixes are unchanged. See [validation](VALIDATION.md), the [transport report](reports/2026-10-17-transport-budget.zh.md) and [DeepSeek-specific checks](reports/2026-10-17-deepseek.zh.md).
+[中文](README.zh.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases) · [Validation](VALIDATION.md) · [Issues](https://github.com/QI-seven33/dsh-jev-mode/issues)
 
-[中文说明](README.zh.md) · [Installation](INSTALL.zh.md) · [Validation and measurements](VALIDATION.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases)
+An **unofficial, optional Desktop preset** maintained by QI-seven33. It retains the standard capability composition from DeepSeek Harness Desktop **0.2.0-rc.2** and adds limited project-file reads and a JEV authorization check. Your main-model configuration stays in use; the standard preset is unchanged.
 
-An optional preset that combines the standard Desktop tool capabilities with deterministic project reads, bounded JEV semantic selection, and a separate authorization gate. Independently developed and maintained by QI-seven33; this is an unofficial community plugin.
+**There is no established general speed or safety improvement.** Experiments have not shown a consistent benefit for everyday agent tasks. The classifier has known gaps; real-world authorization false-allow/false-block rates remain unmeasured.
 
-## Install
+## Installation
 
-In Harness Desktop, open **Plugins**, install and enable:
+In Harness Desktop's **Plugins** page, install and enable:
 
 ```text
 github:QI-seven33/dsh-jev-mode#v0.4.4
 ```
 
-Alternatively, download [dsh-jev-mode-0.4.4.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz) and enter its absolute local path in the same installer. Restart Harness completely, then choose **JEV decision mode** in a new session. Cloning the repository alone does not activate the plugin.
+Alternatively, install the [versioned .tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz) by URL or absolute local path. The source ZIP is not a plugin package.
 
-Tested against **DeepSeek Harness Desktop 0.2.0-rc.2**. Other host versions and operating systems need separate validation. Ready-to-run JavaScript is included; there are no runtime dependencies or build/install lifecycle scripts.
+Fully restart Harness and select **JEV decision mode** in a new session. Open **Settings → Models → JEV decision model → Edit** to save your own TypeSafe API key. Keep your existing DeepSeek main-model settings. The credential dot means configured, not API connectivity verified.
 
-## Enter your own key
+No runtime dependencies or build/install lifecycle scripts are required. Verified environment: **Desktop 0.2.0-rc.2 on Windows**. Other versions and operating systems need separate validation. See [installation details](INSTALL.zh.md) and [acceptance steps](ACCEPTANCE.zh.md).
 
-Open **Settings → Models → JEV decision model → Edit**. Enter your personal TypeSafe API key and save. The plugin uses Harness's write-only credentials service under `TYPESAFE_API_KEY`. No shared key is included, and saved values are never returned to the browser or model conversation. Keep your existing DeepSeek main-model configuration.
+## Shipped behavior
 
-The collapsed card opens the host modal on Edit. It supports save, replacement, removal and status refresh. The dot indicates a configured credential, not API connectivity. Environment-provided credentials are read-only; removing a stored key can expose an existing `.env` fallback.
-
-These images are component-test previews using the actual host React/Modal with a stubbed credentials remote; they do not depict a live authenticated Desktop session.
-
-![Collapsed model settings card](assets/settings-card.png)
-
-![Credential edit dialog](assets/settings-dialog.png)
-
-## What the mode does
-
-| Task | Behavior |
+| Request or operation | Behavior |
 | --- | --- |
-| Explicit root package.json / README.md query | Code chooses the file; native read and permissions run; zero JEV selection calls. |
-| Eligible short contrastive request, both fixed files available | JEV may select one fixed read. Valid confidence and selected probability must both reach 0.9; otherwise ordinary planning continues. |
-| Risky operation | Hard rules run first. Risk 2+ operations use real human instruction history for semantic authorization. Host permission vetoes remain authoritative. |
-| Ordinary code or document task | Standard planning and tools; no automatic advisory JEV calls. Quoted commands in document content are not treated as executions. |
+| Explicit query about root `package.json` or `README.md` | Code selects the file and uses native read/permissions; zero JEV selection calls. |
+| Eligible short contrastive request between those two files | Bounded JEV selection. Confidence and selected probability must both reach 0.9; otherwise ordinary planning continues. |
+| Operation classified at risk 2 or above | Hard rules run first, then JEV checks human authorization. Native permission vetoes remain authoritative. |
+| Ordinary coding or document task | Standard planning and tools. No automatic skill selection, general preloading, or grounded/sufficient verification loop. |
 
-Without a TypeSafe key, explicit reads still work, semantic reads fall back, and failed dangerous authorization checks escalate or deny. Manual `jev_decide` and `jev_gate` tools remain available for human-requested diagnostics; `jev_status` reports version and counters.
+`jev_status` reports the version and counters. `jev_decide` and `jev_gate` are available for explicitly requested diagnostics. A diagnostic result is not execution permission.
 
-The system prompt section and complete tool catalog remain fixed within a session. Runtime notices append after retained history using the host's producer-owned V4 message contract. Dynamic tool pruning and status-prefix rewrites are avoided to preserve DeepSeek prefix reuse. Cache hits remain best-effort and are not guaranteed. The ledger stores metadata and hashes, not command bodies, reasons or credentials.
+The default decision model is pinned to **`jev-1.13.0`**. Authorization uses **Noul**, thresholds **0.85 / 0.55**, and `gateAtRisk: 2`. Main-model history, reasoning and tool definitions are retained. Cache hits are best-effort, not guaranteed.
 
-## Evidence and limits
+Without a TypeSafe key, explicit reads still work, semantic reads fall back, and unavailable authorization checks ask for approval or deny. Choose the standard preset to stop using the mode; disable the plugin in Plugins to remove its contribution.
 
-The selection/authorization policy remains the 0.4.0 design. Version 0.4.3 hardens execution boundaries and aligns desktop UI; it does not introduce new automatic decisions. The earlier controlled standard-vs-hybrid comparison achieved 28/28 scripted task successes in both arms and fewer main-model requests, but JEV-mode P95 was worse. These are small local measurements, not universal speed or accuracy claims. See [VALIDATION.md](VALIDATION.md) for exact scope.
+## What changes in 0.4.4
 
-Authorization thresholds 0.85 / 0.55 have not been calibrated for this domain. Real-world false-allow/false-block rates are unmeasured. An automatic grounded/sufficient verification loop and per-decision client badges are not shipped.
+This is a **reliability release**: deadline-aware `Retry-After` handling, instance-local server cooldown, bounded credential lookup, and an auxiliary cancellation-signal repair. User cancellation does not count as a provider failure. It retains the compact settings card and native edit dialog from 0.4.3; the maintainer reported that UI working normally.
 
-## Development
+The experimental `/jev-json-set` transaction plugin is **not included**. Its narrow benchmark gains do not describe this release. See the [changelog](CHANGELOG.md) and [validation](VALIDATION.md) for exact coverage, skips and measurement limits.
+
+## Security and data flow
+
+- The gate supplements native permissions; it cannot replace the sandbox or grant extra rights. Variants such as `npm --prefix subproject publish` and `git -C subproject push` can miss the JEV gate. A low risk label does not prove safety or authorization.
+- Semantic checks send bounded context to TypeSafe, such as the relevant request or human authorization history and proposed action. Redaction is best-effort; do not put secrets in prompts or command arguments. Calls may incur separate charges.
+- Keys use Harness's credentials service. Saved values are not returned to the browser or model conversation. No shared key is shipped. Environment credentials are read-only; removing a stored key may expose an existing environment fallback.
+- The local ledger stores metadata and hashes, not command bodies, decision-reason bodies or credentials.
+
+## Settings and UI
+
+Defaults include `controlledFlow: true`, `semanticReads: true`, `autoGate: true`, `onGateFailure: escalate`, and `statusContext: false`. Set `semanticReads: false` in the mode configuration to use ordinary planning for ambiguous reads. Restart and open a new session after changing preset configuration.
+
+<details>
+<summary>Settings UI previews</summary>
+
+Component-test previews using host React/Modal and a stubbed credentials remote; not an authenticated Desktop session.
+
+<p><img src="assets/settings-card.png" alt="Compact JEV model settings card" width="360"></p>
+<p><img src="assets/settings-dialog.png" alt="JEV credential edit dialog" width="360"></p>
+
+</details>
+
+## Development and support
 
 ```sh
 npm install --no-save --no-package-lock yaml@2
 npm test
 ```
 
-Native-host checks require Node 24 and the host module locations via `DSH_HOST_NODE_MODULES` / `DSH_HOST_NATIVE_NODE_MODULES`. CI runs offline checks on Node 20, 22 and 24 and explicitly reports absent-host skips. Live benchmark scripts are opt-in; see [bench/COMPARE.md](bench/COMPARE.md). Do not commit credentials, profiles or raw conversation traces.
+CI runs offline checks on Node 20/22/24. Native checks require Node 24 and host paths via `DSH_HOST_NODE_MODULES` / `DSH_HOST_NATIVE_NODE_MODULES`; absent-host skips are not compatibility evidence. Live API checks are opt-in.
 
-[Acceptance steps](ACCEPTANCE.zh.md) · [Source attribution](PROVENANCE.md) · [Release procedure](RELEASING.md)
+For issues, include plugin/host versions, OS, new-session status and minimal reproduction steps. Remove credentials and sensitive content from logs. New feature research is closed; no additional JEV involvement in ordinary tasks is planned.
 
-MIT License · Copyright 2026 QI-seven33.
-
-The command classifier has known gaps; a low risk label is not evidence of safety. See the concrete command variants and boundaries in [VALIDATION.md](VALIDATION.md).
+[Source attribution](PROVENANCE.md) · [Release procedure](RELEASING.md) · [MIT License](LICENSE)
