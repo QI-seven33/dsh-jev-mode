@@ -35,11 +35,16 @@ const [{ Context }, llm, sessions, system, tools, agents, loop, projections, per
 ]);
 const root = await mkdtemp(path.join(os.tmpdir(), 'jev-controlled-'));
 let choice = 'project_manifest', confidence = .98, httpCalls = 0, decisionDelay = 0;
-let authorizationProbability = .1, authorizationHook;
+let authorizationProbability = .1, authorizationHook, authorizationStatus = 200;
 const server = http.createServer((req, res) => {
   let body = ''; req.on('data', b => body += b); req.on('end', () => {
     httpCalls++; const data = JSON.parse(body);
     if (data.questions.authorize) {
+      if (authorizationStatus === 429) {
+        res.writeHead(429, { 'content-type': 'application/json', 'retry-after': '30' });
+        res.end('{"error":"synthetic rate limit"}');
+        return;
+      }
       const respond = () => { if (!res.writableEnded && !res.destroyed) res.end(JSON.stringify({ answers: { authorize: { type: 'noul', noul: authorizationProbability } } })); };
       if (authorizationHook) authorizationHook(respond); else respond();
       return;
@@ -193,6 +198,23 @@ try {
   }
   authorizationProbability = .1;
   console.log('ok native allowed-write control, in-flight/downstream revocation and user cancellation: stale writes never execute');
+  authorizationStatus = 429;
+  try {
+    for (const policy of ['escalate', 'deny']) {
+      const limited = await host('rate-limited-'+policy, { pluginConfig: { onGateFailure: policy } });
+      const requestCount = httpCalls;
+      try {
+        for (let i = 0; i < 2; i++) {
+          const target = path.join(root, 'rate-limited-'+policy+'-'+i+'.txt');
+          const result = await limited.ctx.tools.execute({ name: 'write', arguments: { file_path: target, content: 'must not execute' },
+            callId: 'limited-'+i, agent: limited.agent, signal: AbortSignal.timeout(3000) });
+          assert.equal(result.isError, true); assert.equal(existsSync(target), false);
+        }
+        assert.equal(httpCalls - requestCount, 1, 'cooldown prevents the second native execution from contacting the provider');
+      } finally { await close(limited); }
+    }
+  } finally { authorizationStatus = 200; }
+  console.log('ok native rate-limit budget and shared cooldown preserve ask/deny; all four writes remain absent');
   const reuse = await host('reuse'); await turn(reuse, 'package.json 中的依赖是什么？');
   const afterFirst = httpCalls;
   await turn(reuse, 'package.json 中的项目名称是什么？');

@@ -5,8 +5,8 @@
 适配并验证的宿主为 DeepSeek Harness Desktop 0.2.0-rc.2。其他版本需核对模型设置槽位、凭据服务和标准预设组合，不能据此承诺所有版本兼容。
 
 1. 打开 Harness 的「插件」管理页面，选择安装插件。
-2. 输入 `github:QI-seven33/dsh-jev-mode#v0.4.3`，安装并启用。
-3. 也可下载 [Release 附件 dsh-jev-mode-0.4.3.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.3/dsh-jev-mode-0.4.3.tgz)，在相同安装入口填写该文件的绝对路径。不要将源码 zip 或 `.dshpreset` 当作 npm 插件包。
+2. 输入 `github:QI-seven33/dsh-jev-mode#v0.4.4`，安装并启用。
+3. 也可下载 [Release 附件 dsh-jev-mode-0.4.4.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz)，在相同安装入口填写该文件的绝对路径。不要将源码 zip 或 `.dshpreset` 当作 npm 插件包。
 4. 完全退出并重启 Harness。
 5. 「设置 → 模型」底部会出现收起的「JEV 决策模型」卡片。点击「编辑」，输入自己的 TypeSafe API 密钥并保存。状态点表示凭据已配置，不表示已验证 API 连通性。
 6. 新会话选择「JEV 决策模式」。仅安装插件、只使用标准模式不会激活 JEV 的读取和授权逻辑。
