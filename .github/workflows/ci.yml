@@ -82,6 +82,15 @@ jobs:
       - name: Content-free reasoning and latency metrics
         run: node --test test/stream-metrics.test.mjs
 
+      - name: Native execution bridge and current working directory
+        run: node --test test/native-tools.test.mjs
+
+      - name: Scoped HTTP proxy and cancellation (native dispatcher requires installed host)
+        run: node --test test/http-network.test.mjs
+
+      - name: Installed-host preset compatibility (requires installed host)
+        run: node test/host-compat.test.mjs
+
       - name: Credential settings contracts
         run: node test/settings.test.mjs
 

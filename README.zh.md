@@ -2,7 +2,7 @@
 
 [English](README.md) · [发布版本](https://github.com/QI-seven33/dsh-jev-mode/releases) · [验证与限制](VALIDATION.md) · [问题反馈](https://github.com/QI-seven33/dsh-jev-mode/issues)
 
-由 QI-seven33 独立维护的**非官方、可选桌面预设**。基于 DeepSeek Harness Desktop **0.2.0-rc.2** 的标准能力组合，增加有限的项目文件读取和 JEV 授权检查。主模型沿用你的配置，原有标准预设不变。
+由 QI-seven33 独立维护的**非官方、可选桌面预设**。基于 DeepSeek Harness Desktop **0.2.2-rc.3** 的标准能力组合，增加有限的项目文件读取和 JEV 授权检查。主模型沿用你的配置，原有标准预设不变。
 
 **尚未证明通用提速或安全准确性提升。** 多轮实验未发现日常 Agent 任务的稳定收益；分类器存在漏检，真实授权误放行率、误拦率尚未测量。
 
@@ -11,14 +11,14 @@
 在 Harness 桌面版的「插件」页面安装并启用：
 
 ```text
-github:QI-seven33/dsh-jev-mode#v0.4.4
+github:QI-seven33/dsh-jev-mode#v0.4.6
 ```
 
-也可在同一入口填写 [固定版本 .tgz 链接](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.4/dsh-jev-mode-0.4.4.tgz)，或下载后填写绝对本地路径。源码 ZIP 不是插件安装包。
+也可下载 [dsh-jev-mode-0.4.6.tgz](https://github.com/QI-seven33/dsh-jev-mode/releases/download/v0.4.6/dsh-jev-mode-0.4.6.tgz)，填写其绝对本地路径。0.4.6 包含未公开发布的 0.4.5 兼容改动，并修复其目录联接安装的代理模块加载缺陷。公开的 0.4.4 仅保留给旧版 0.2.0-rc.2 宿主。源码 ZIP 不是插件安装包。
 
 完全退出并重启 Harness，在新会话选择「JEV 决策模式」。打开「设置 → 模型 → JEV 决策模型 → 编辑」，保存自己的 TypeSafe API 密钥。DeepSeek 主模型设置保持原样；状态点只表示已配置，不表示 API 连通。
 
-无需运行时依赖或安装编译步骤。已验证环境为 **Desktop 0.2.0-rc.2、Windows**，其他宿主版本和系统需另行验证。详见 [安装说明](INSTALL.zh.md) 和 [验收步骤](ACCEPTANCE.zh.md)。
+无需运行时依赖或安装编译步骤。已验证环境为 **Desktop 0.2.2-rc.3、Windows**，其他宿主版本和系统需另行验证。详见 [安装说明](INSTALL.zh.md) 和 [验收步骤](ACCEPTANCE.zh.md)。
 
 ## 实际提供的能力
 
@@ -34,6 +34,16 @@ github:QI-seven33/dsh-jev-mode#v0.4.4
 默认固定 **`jev-1.13.0`**。授权使用 **Noul**，阈值保持 **0.85 / 0.55**，`gateAtRisk: 2`。保留主模型历史、推理和工具定义；缓存命中不保证固定比例。
 
 没有 TypeSafe 密钥时：明确读取仍可用，语义读取回退，授权服务不可用时进入审批或拒绝。停止使用时选择标准预设；需要移除插件贡献时，在「插件」页面禁用。
+
+## 0.4.6 部署修复与宿主兼容
+
+通过宿主注入的 `profileContext.installAnchor` 解析公开代理模块导出，不从插件工作区裸导入，不猜测 ASAR 路径。模块不可用时给出明确部署错误、不重试、不计为后端熔断故障，也不伪报已发送 HTTP 请求。
+
+同步新版标准预设，修复已移除的模块导出与批量工具执行接口，并跟随宿主当前工作目录。模型、阈值和权限策略保持，尚需更新后完全重启并新建会话验收。
+
+Windows 下，JEV HTTP 请求优先遵守 Harness 启动时的代理配置；没有显式配置时，自动读取已经启用的 Windows 手动 HTTP(S) 系统代理。Clash 可以保持规则模式，不要求全局模式、TUN 或修改全局环境变量。域名走哪条规则仍由你的代理配置决定；插件不修改规则，也不在代理失败后偷偷改为直连。此适配只作用于 JEV，不改变主模型网络。
+
+真实 Electron/ASAR 和目录联接安装已通过默认加载器验证。2026-11-17 另用本机已安装的 0.4.6 和原生凭据完成五通道真实检查：5 次均返回有效判定，246–559ms、零重试，规则模式、TUN 关闭。这是连通性证据，不是提速或安全准确性证据，详见验证记录。仍需自己的密钥和可访问服务的路由；PAC/WPAD、仅 SOCKS 的系统代理不支持。服务不可达时如实降级，无法提供 JEV 判断。
 
 ## 0.4.4 的改动
 

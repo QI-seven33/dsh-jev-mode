@@ -1,6 +1,6 @@
 # Maintaining releases
 
-The repository includes runnable JavaScript and a dsh.bundle manifest; consumers do not build it. Version 0.4.4 is a reliability-only release: retain the existing UI, model and authorization policy, and exclude untracked research and the default-off JSON transaction prototype.
+The repository includes runnable JavaScript and a dsh.bundle manifest; consumers do not build it. Version 0.4.6 is a compatibility and reliability maintenance release for Desktop 0.2.2-rc.3: retain the existing UI, model and authorization policy, and exclude untracked research and the default-off JSON transaction prototype. Validate linked workspaces with the packaged Electron/ASAR and the default host-injected transport loader; copied profiles or injected test loaders alone do not establish Desktop compatibility.
 
 1. Run the offline suite and native-host regressions against the target Desktop version. Inspect the change, scope and user acceptance steps.
 2. Create a clean snapshot from the reviewed tracked files, not the developer's mixed working directory. Scan that snapshot for credentials. Exclude profiles, environment files, raw traces, untracked experiments and private historical Git content. Run checks against this exact snapshot.

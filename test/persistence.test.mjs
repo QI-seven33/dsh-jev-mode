@@ -77,7 +77,8 @@ async function host(compression) {
     }
   }
   for (const p of [llm, sessions, projections, system, tools, agents]) await ctx.plugin(p.default);
-  await ctx.plugin(persistence.default, { root: path.join(root, compression), compression });
+  await ctx.plugin(await mod('@deepseek-ai/dsh-tool-executor-native'));
+  await ctx.plugin(persistence.default ?? persistence, { root: path.join(root, compression), compression });
   await ctx.plugin(loop.default, { agents: [] });
   ctx.llm.registerAdapter(['mock'], new Adapter());
   await ctx.plugin(plugin, { backend: 'typesafe', autoRoute: true, ledger: false,

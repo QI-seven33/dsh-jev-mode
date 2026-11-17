@@ -1,5 +1,48 @@
 # Validation and measurement boundaries
 
+## Version 0.4.6 deployment repair
+
+The 0.4.5 linked Desktop installation was broken: its bare proxy-module import failed with ERR_MODULE_NOT_FOUND before HTTP dispatch. The earlier copied-profile test exercised native resolver hooks, and the live diagnostic supplied a module loader explicitly. Neither established that the linked Desktop plugin could load its transport. The earlier conclusion that the installed plugin was usable is withdrawn.
+
+The actual installed Electron executable (44.7.0, Node 24.21.0) reproduced that failure from the real linked plugin directory without resolver hooks. In the same process, the public proxy export resolved from the real packaged host installation anchor inside ASAR; its dispatcher/request API and the fixed read-only system-registry query both worked. This isolates a deployment problem rather than inferring a new provider outage.
+
+Version 0.4.6 obtains profileContext.installAnchor from the native launcher and resolves the public host export from it. It does not search workspaces, infer ASAR layout, install global hooks, vendor private host files or add a second HTTP library. Missing injection/export fails with JEV_PROXY_MODULE_UNAVAILABLE: zero HTTP traffic, no retry and no provider-breaker failure. Standard tools and native permission ownership remain unchanged. Packaged linked-installation tests and interactive Desktop acceptance are tracked separately; the initial deployment repair used no further real API calls. A subsequent bounded pre-release smoke is recorded below.
+
+The complete local suite passes (40 node:test cases, zero skips, plus native persistence/read/permission/DeepSeek fixture suites). Deployment verification runs the installed Electron executable in Node mode against the real ASAR, with an isolated profile junction pointing at an external copy of the final package and no plugin node_modules. A request through the default loader succeeds before global resolver hooks are installed. Full native host boot then creates standard/JEV agents, verifies all 40 standard tool schemas remain identical, executes jev_status returning 0.4.6, and invokes native jev_decide authorize through a local synthetic proxy, returning the fixture's expected deny. Two local fixture HTTP requests; zero real-model calls. The real Electron process also successfully reads the enabled Windows system proxy. This is deployment and control-flow evidence, not a new live-provider accuracy or latency claim. Existing UI processes may cache 0.4.5 until fully restarted; user-session acceptance remains separate.
+
+### Bounded live check and maintainer feedback
+
+The maintainer reported Desktop 0.4.6 returning real results on all five channels, with budget and ledger updates. This is user-reported interactive acceptance, not an independently inspected private transcript. Boundary probabilities in that report do not establish false-allow rates or justify changing thresholds.
+
+A separate pre-release check ran the actual installed 0.4.6 modules in the installed Electron/ASAR runtime, using the default host-anchor loader and the native credential service in read-only mode. Five synthetic states were sent to pinned jev-1.13.0, at most five HTTP requests with zero retries. Windows system-proxy discovery was used without proxy environment overrides; read-only snapshots confirmed rule mode and TUN disabled before and after. No private session content, settings or credentials were written or copied.
+
+| Channel | Observed result | Time |
+| --- | --- | --- |
+| route | inspect, selected probability 0.46 | 559ms |
+| risk | level 0, probability 1.00 | 447ms |
+| authorize | deny, Noul 0.03 after explicit revocation | 246ms |
+| grounded | allow, Noul 0.98 | 255ms |
+| sufficient | allow, Noul 0.97 | 268ms |
+
+All five responses were structurally valid; usage totaled 2,091 input and 144 output tokens. The route selection is below the existing 0.9 automatic-selection cut and would retain ordinary planning. No thresholds or models were adjusted. These deliberately simple cases establish current connectivity and expected basic behavior only; there is no baseline, repeatability estimate, calibration study or general performance claim. Native permission/gate failure paths remain covered by offline and local fixture tests; no real destructive command, publication or force-push was used as a safety experiment.
+
+## Version 0.4.5 compatibility candidate
+
+Local target: Windows, installed Desktop 0.2.2-rc.3. The preset reproduces that host's standard child configuration exactly after excluding the single JEV row; 28 enabled native plugin entry points resolve. The old subagent-control/list-agents export no longer resolves. Runtime tool execution now uses correlated batches through the native executor, not direct filesystem access.
+
+The complete suite passes against the newly extracted installed host, including none/zstd cold reopen, retained model history/catalog, controlled reads, denial, revocation, cancellation and throttling. The node:test portion passes 38 cases, including batch ownership/denial, no retry after an uncertain outcome, authorization invalidation after a host working-directory transition, and scoped HTTP proxy routing. These automated suites use synthetic adapters and loopback HTTP, not paid model APIs or safety-accuracy labels. A separately bounded live connectivity check is described below.
+
+Model jev-1.13.0, Noul thresholds 0.85/0.55, gateAtRisk=2 and classifier limits remain unchanged. The candidate has not been publicly released. New standard-host capabilities change the cross-version composition; per-session tool and history stability remains required. Full Desktop restart/new-session acceptance is separate from these isolated tests. The settings client is unchanged.
+
+### Rule-mode connectivity repair (2026-11-17)
+
+The unadapted Node route received HTTP 451 with a provider region-denial response; an unauthenticated probe through the existing system proxy received HTTP 403 requiring a key. Neither status proves the user has no saved key or must enable Global/TUN. The native credential service confirmed an existing key without exposing it.
+
+JEV HTTP now uses the launch proxy policy, or the enabled Windows manual HTTP(S) system proxy when no launch proxy is explicitly configured. It creates request-owned dispatchers through the installed host's public dsh-http-proxy API and uses their own request API, avoiding Node/host undici handler incompatibility. It does not mutate global dispatchers, environment, Windows or Clash settings. Proxy errors do not cause a direct retry. Windows exact-host/wildcard bypass, native NO_PROXY/loopback bypass, abort, redirect refusal and cleanup have local regression coverage. PAC/WPAD and SOCKS-only system proxies are unsupported and fail explicitly.
+
+Bounded live diagnosis made three authenticated attempts: the first failed without a retained detailed cause; the second returned a structurally valid Choice, but the diagnostic scorer incorrectly compared its probability with the expected choice id, so it is not evidence of routing correctness. The final attempt used the repaired transport, no proxy environment overlay, the existing native credential service and synthetic context forbidding publication. It returned a valid authorize Noul of 0.06 in 690ms, one HTTP request, zero retries. Read-only local controller snapshots confirmed Clash rule mode and TUN disabled before and after. No real publication was attempted. This verifies one reachable authenticated route, not long-term stability, all five channels, geographic availability or safety accuracy. The diagnostic scorer issue is recorded rather than counted as a product failure.
+
+
 ## Version 0.4.4
 
 This release closes the reliability work only. It retains the compact settings card and native edit modal from 0.4.3; the maintainer reported those UI changes working normally. It does not introduce a new selector, preloading workflow, transaction command or general task-performance optimization. The separately retained `/jev-json-set` prototype is experimental, default-off and excluded from both the install package and release source snapshot. Its timing results do not describe 0.4.4.

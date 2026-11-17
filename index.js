@@ -1,3 +1,4 @@
+import { sessionCwd } from './lib/session-cwd.js';
 // dsh-jev-mode — a JEV (typed System-One decision) mode for DeepSeek Harness.
 //
 // WHAT THIS IS
@@ -24,12 +25,10 @@
 //    message varies. `cacheReadTokens` per decision is written to the ledger, so
 //    the claim is measured rather than asserted.
 //
-// 2. Zero dependencies. This file imports only Node builtins. A profile-installed
-//    bundle cannot resolve `@deepseek-ai/*` bare specifiers, and a plugin that
-//    pins those packages couples itself to the harness version — the failure mode
-//    that dominates community bug reports for this exact plugin family. Every
-//    host capability is reached through a Service key on `ctx`, and tool schemas
-//    are written as plain JSON Schema, which is what the tool registry accepts.
+// 2. No separately installed runtime dependencies. Host capabilities use public
+//    services and plain JSON Schema. The current host's public HTTP-proxy helper
+//    is loaded lazily for request-scoped dispatchers; engines.dsh names the exact
+//    host version tested. No private transport files or global proxy mutations.
 
 import { mkdir } from 'node:fs/promises';
 import os from 'node:os';
@@ -38,6 +37,7 @@ import { randomUUID } from 'node:crypto';
 
 import { CHANNELS, CHANNEL_IDS, normalizeAnswer, verdictFor } from './lib/channels.js';
 import { createDecisionPipeline, createHttpEngine, createModelEngine } from './lib/engine.js';
+import { createHttpNetwork } from './lib/http-network.js';
 import { classifyAction, createGate, RUBRIC_VERSION, authorizationState } from './lib/gate.js';
 import { controlledCandidates, selectControlled, executeControlled, reuseVisibleEvidence } from './lib/controlled.js';
 import { planInspection } from './lib/selection.js';
@@ -56,7 +56,7 @@ export const name = 'jev-mode';
 export const inject = ['llm', 'tools', 'systemPrompt'];
 
 /** Plugin version, stamped into ledger rows so a schema change is visible. */
-const PLUGIN_VERSION = '0.4.4';
+const PLUGIN_VERSION = '0.4.6';
 
 /**
  * Fixed prompt-section order.
@@ -299,6 +299,7 @@ function guidanceFor(channel, verdict, answer) {
 export function apply(ctx, rawConfig) {
   const config = normalizeConfig(rawConfig);
   const logger = ctx.logger;
+  const network = createHttpNetwork({ hostContext: ctx, environment: ctx.get?.('launchEnvironment') });
   const ledger = createLedger({ dir: config.ledgerDir, logger, pluginVersion: PLUGIN_VERSION, enabled: config.ledgerEnabled });
   const resolveCredential = (settings) => {
     if (settings.apiKey) return settings.apiKey;
@@ -316,6 +317,7 @@ export function apply(ctx, rawConfig) {
     model: config.typesafe.model,
     resolveKey: () => resolveCredential(config.typesafe),
     maxStateChars: config.maxStateChars,
+    fetchFn: network.fetch,
   });
   const openrouterEngine = createHttpEngine({
     id: 'openrouter',
@@ -323,6 +325,7 @@ export function apply(ctx, rawConfig) {
     model: config.openrouter.model,
     resolveKey: () => resolveCredential(config.openrouter),
     maxStateChars: config.maxStateChars,
+    fetchFn: network.fetch,
   });
 
   // `auto` prefers a configured remote JEV model over the session's own route.
@@ -584,7 +587,7 @@ export function apply(ctx, rawConfig) {
       const classified = classifyAction({
         toolName: 'planned',
         args: { action, target },
-        cwd: session?.header?.cwd,
+        cwd: sessionCwd(session),
       });
       if (classified.hard !== null) {
         await ledger.recordGate({
@@ -722,7 +725,7 @@ export function apply(ctx, rawConfig) {
           if (exec.name === 'jev_gate' || exec.name === 'jev_decide' || exec.name === 'jev_status') return next();
 
           const session = agent.session;
-          const cwd = session?.header?.cwd;
+          const cwd = sessionCwd(session);
           const classified = classifyAction({ toolName: exec.name, args: exec.arguments, cwd });
           // The common path: below the gate threshold there is no call, no
           // ledger row and no added latency.
@@ -828,15 +831,18 @@ export function apply(ctx, rawConfig) {
           accepting = false;
           lifecycle.abort(new Error('dsh-jev-mode disposed'));
           await Promise.allSettled([...active]);
+          await network.dispose();
         };
       },
       'jev-mode.lifecycle()',
     );
   } else {
     ctx.effect(
-      () => () => {
+      () => async () => {
         accepting = false;
         lifecycle.abort(new Error('dsh-jev-mode disposed'));
+        await Promise.allSettled([...active]);
+        await network.dispose();
       },
       'jev-mode.lifecycle()',
     );

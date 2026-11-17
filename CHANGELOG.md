@@ -1,3 +1,22 @@
+# 0.4.6 (2026-11-17)
+
+- Ship the previously unpublished 0.4.5 Desktop 0.2.2-rc.3 compatibility, native batch/cwd and rule-proxy repairs together with the deployment fix below. Retain the 0.4.4 reliability fixes and existing UI; no experimental features or general performance claims.
+
+- Fix proxy module loading from junction-linked workspace plugins. Resolve the public host export using the launcher-injected profileContext.installAnchor; do not rely on bare imports, optional resolver hooks or guessed ASAR paths.
+- Report a missing host proxy as a local deployment error, without nested paths or secrets. Do not retry, add provider-breaker failures or count HTTP traffic before dispatch.
+- Correct the 0.4.5 verification claim: a copied isolated profile and an explicitly injected loader did not establish Desktop linked-installation compatibility. Add linked-directory and real packaged Electron/ASAR deployment checks. No model or threshold changes.
+- Complete a bounded five-channel live smoke through the installed code and default loader: five valid responses, zero retries, native credentials and existing rule-mode system proxy. Record the limits and user-reported Desktop acceptance without inferring performance or safety calibration.
+
+# 0.4.5 (unreleased, 2026-11-17)
+
+- Adapt the preset to the installed Desktop 0.2.2-rc.3 standard composition. Remove the no-longer-exported subagent list entry and retain the current native time, scheduling, skill, Office and delegation configuration.
+- Use the native batch tool-execution contract for controlled reads, retaining Agent ownership, cancellation, native permissions and deferred context. Never retry a failed batch through another execution path.
+- Follow host-owned working-directory changes for reads, risk classification and authorization freshness instead of assuming the immutable original project directory is current.
+- Pin the declared host compatibility to the version actually tested. Update native fixtures for the new executor, working-directory service and JSONL plugin entry; add installed-host capability parity and batch/cwd regressions.
+- Keep jev-1.13.0, Noul and existing thresholds unchanged. No research features or experimental transaction commands are enabled. This compatibility candidate is local; no public release is implied.
+- Honor explicit Harness proxy settings and otherwise discover the enabled Windows manual HTTP(S) system proxy for JEV HTTP calls only. Use a request-owned native dispatcher/request API rather than mixing host undici v8 dispatchers with an older Node built-in fetch. Keep rules, global dispatcher, process environment, main-model transport and credentials unchanged. Preserve deadlines, redirect refusal, loopback bypass and no direct fallback on proxy failure.
+- Verify manual proxy parsing/bypass, cancellation, scoped lifetime and real native HTTP proxy routing. A bounded synthetic live authorization check succeeded with rule mode, TUN off and no proxy environment overlay; this is connectivity evidence, not a speed or safety-quality claim. PAC/WPAD and SOCKS-only system proxies remain unsupported.
+
 # 0.4.4 (2026-10-17)
 
 - Close out as a reliability-only release. Retain the 0.4.3 settings UI; do not ship the experimental JSON transaction plugin or introduce new JEV involvement in everyday tasks. Rewrite both READMEs around shipped behavior, data flow, installation and known limits, with smaller, collapsed UI previews.

@@ -1,3 +1,4 @@
+import { executeNativeTool } from '../lib/native-tools.js';
 // Native host, native filesystem/read/permission waterfall, native V4 disk.
 // Mock models here prove control flow only, never production performance.
 import assert from 'node:assert/strict';
@@ -8,7 +9,7 @@ import os from 'node:os';
 import http from 'node:http';
 import * as nodeModule from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { eligibleRequest, selectControlled, controlledCandidates, reuseVisibleEvidence } from '../lib/controlled.js';
+import { eligibleRequest, selectControlled, controlledCandidates, executeControlled, reuseVisibleEvidence } from '../lib/controlled.js';
 
 const base = process.env.DSH_HOST_NODE_MODULES ?? 'E:/SOME_SEVEN_PROJECT-57/_recon/asar/dsh/node_modules';
 if (!existsSync(path.join(base, '@deepseek-ai/dsh-session-persistence-jsonl/lib/index.js'))) {
@@ -79,8 +80,9 @@ async function host(id, { enabled = true, deny = false, compression = 'none', pl
     }
   }
   for (const p of [llm, sessions, projections, system, tools, agents]) await ctx.plugin(p.default);
-  await ctx.plugin(fsLocal.default, {}); await ctx.plugin(toolFs);
-  await ctx.plugin(persistence.default, { root: path.join(root, `${id}-disk`), compression });
+  await ctx.plugin(await mod('dsh-tool-executor-native'));
+  await ctx.plugin(fsLocal.default, {}); await ctx.plugin((await mod('dsh-working-directory')).default, {}); await ctx.plugin(toolFs);
+  await ctx.plugin(persistence.default ?? persistence, { root: path.join(root, `${id}-disk`), compression });
   await ctx.plugin(loop.default, { agents: [] }); ctx.llm.registerAdapter(['fixture'], new Adapter());
   if (deny) ctx.on('tools/pre-execute', async (_exec, _next) => ({ kind: 'deny', reason: 'fixture permission refusal' }));
   ctx.on('tools/result', (exec, result) => { executions.push({ name: exec.name, error: !!result.error, callId: exec.callId }); });
@@ -119,16 +121,29 @@ try {
     assert.equal(events.filter(e => e.data?.source?.summary?.includes('controlled=')).length, 2);
     await close(h);
     const cold = new Context(); contexts.add(cold);
-    await cold.plugin(sessions.default); await cold.plugin(persistence.default, { root: path.join(root, `controlled-${compression}-disk`), compression });
+    await cold.plugin(sessions.default); await cold.plugin(persistence.default ?? persistence, { root: path.join(root, `controlled-${compression}-disk`), compression });
     const coldReader = await cold.sessionPersistence.open(sessions.SessionId(`controlled-${compression}`), 'read');
     const reread = (await coldReader.read()).events; await coldReader.close(); assert.deepEqual(reread, events);
     await cold.fiber.dispose(); contexts.delete(cold);
     console.log(`ok controlled ${compression}: real read, two turns, V4 disk and cold reopen, unchanged previous prefix/catalog, standard 2 vs controlled 1 scripted model calls`);
   }
   assert.equal(httpCalls, 0, 'all explicit controlled reads must use zero decision HTTP calls');
+  const drift = await host('working-directory-change');
+  const [staleAction] = await controlledCandidates(drift.ctx, drift.agent, 'package.json 中的依赖是什么？');
+  const shifted = path.join(root, 'shifted-project'); await mkdir(shifted);
+  await writeFile(path.join(shifted, 'package.json'), '{"name":"shifted-fixture"}');
+  await drift.ctx.workingDirectory.set(drift.agent, shifted);
+  await assert.rejects(executeControlled({ ctx: drift.ctx, agent: drift.agent, action: staleAction,
+    result: { backend: 'deterministic', confidence: 1 }, requestId: 'stale-cwd' }), /working directory changed/);
+  assert.equal(drift.executions.length, 0, 'old-directory read must not execute');
+  await turn(drift, 'package.json 中的项目名称是什么？');
+  assert.ok(notices(drift).some(e => e.data.content[0].text.includes('shifted-fixture')));
+  assert.equal(drift.requests.length, 1);
+  await close(drift);
+  console.log('ok native working-directory transition: stale read refused, new project read through native tools');
   const zero = await host('zero-budget', {pluginConfig:{maxDecisionsPerSession:0}});
   await turn(zero,'package.json 的项目名称是什么？'); assert.equal(zero.executions.length,1); assert.equal(httpCalls,0);
-  const status = await zero.ctx.tools.execute({name:'jev_status',arguments:{},callId:'native-status',agent:zero.agent,signal:AbortSignal.timeout(1000)});
+  const status = await executeNativeTool(zero.ctx.tools, {name:'jev_status',arguments:{},callId:'native-status',agent:zero.agent,signal:AbortSignal.timeout(1000)});
   assert.equal(status.isError,false); assert.equal(status.value.version,JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8')).version);
   assert.equal(status.value.codeSelections,1); assert.equal(status.value.semanticSelections,0); assert.equal(status.value.decisions,0);
   await close(zero);
@@ -160,11 +175,11 @@ try {
   const gated = await host('native-gate');
   gated.agent.session.append('user/message', llm.createUserMessage({ source: { kind: 'user' }, content: [{ type: 'text', text: 'Read this project only. Do not write outside it.' }] }), { surfaceOp: 'append' });
   const outside = path.join(root, 'must-not-exist.txt');
-  const refused = await gated.ctx.tools.execute({ name: 'write', arguments: { file_path: outside, content: 'forbidden' }, callId: 'native-risk-write', agent: gated.agent, signal: AbortSignal.timeout(3000) });
+  const refused = await executeNativeTool(gated.ctx.tools, { name: 'write', arguments: { file_path: outside, content: 'forbidden' }, callId: 'native-risk-write', agent: gated.agent, signal: AbortSignal.timeout(3000) });
   assert.equal(refused.isError, true); assert.equal(existsSync(outside), false);
   const beforeHard = httpCalls;
   const credential = path.join(gated.cwd, '.credentials.yaml');
-  const hard = await gated.ctx.tools.execute({ name: 'write', arguments: { file_path: credential, content: 'forbidden' }, callId: 'native-hard-write', agent: gated.agent, signal: AbortSignal.timeout(3000) });
+  const hard = await executeNativeTool(gated.ctx.tools, { name: 'write', arguments: { file_path: credential, content: 'forbidden' }, callId: 'native-hard-write', agent: gated.agent, signal: AbortSignal.timeout(3000) });
   assert.equal(hard.isError, true); assert.equal(existsSync(credential), false); assert.equal(httpCalls, beforeHard);
   await close(gated);
   console.log('ok native risky write and credential-write bodies never execute; hard rule uses zero JEV calls');
@@ -182,7 +197,7 @@ try {
       return next();
     });
     const controller = new AbortController(); let timer;
-    const pending = fresh.ctx.tools.execute({ name: 'write', arguments: { file_path: target, content: 'isolated fixture' },
+    const pending = executeNativeTool(fresh.ctx.tools, { name: 'write', arguments: { file_path: target, content: 'isolated fixture' },
       callId: 'fresh-'+phase, agent: fresh.agent, signal: controller.signal });
     try {
       if (authorizationHook) {
@@ -206,7 +221,7 @@ try {
       try {
         for (let i = 0; i < 2; i++) {
           const target = path.join(root, 'rate-limited-'+policy+'-'+i+'.txt');
-          const result = await limited.ctx.tools.execute({ name: 'write', arguments: { file_path: target, content: 'must not execute' },
+          const result = await executeNativeTool(limited.ctx.tools, { name: 'write', arguments: { file_path: target, content: 'must not execute' },
             callId: 'limited-'+i, agent: limited.agent, signal: AbortSignal.timeout(3000) });
           assert.equal(result.isError, true); assert.equal(existsSync(target), false);
         }
