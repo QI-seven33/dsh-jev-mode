@@ -1,6 +1,6 @@
 # JEV decision mode for DeepSeek Harness
 
-> Local development is **0.4.7 candidate / Desktop 0.2.2-rc.5**, pushed to `maintenance/desktop-rc5-0.4.7`, with maintainer-reported Desktop acceptance. No merge PR or Release is requested yet. Read [HANDOFF.zh.md](HANDOFF.zh.md) before continuing. The documentation below describes public 0.4.6 for rc.3; use the local candidate for rc.5.
+> Local development is **0.4.7 candidate / Desktop 0.2.2-rc.5**, on the normal `main` branch, with maintainer-reported Desktop acceptance. Only the local project folder moved; no extra merge PR or new Release was created. Read [HANDOFF.zh.md](HANDOFF.zh.md) before continuing. The documentation below describes public 0.4.6 for rc.3; use the local candidate for rc.5.
 
 [中文](README.zh.md) · [Releases](https://github.com/QI-seven33/dsh-jev-mode/releases) · [Validation](VALIDATION.md) · [Issues](https://github.com/QI-seven33/dsh-jev-mode/issues)
 

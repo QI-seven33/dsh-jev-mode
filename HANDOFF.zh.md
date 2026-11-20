@@ -6,7 +6,7 @@
 
 - **主仓库：`E:\SOME_SEVEN_PROJECT-57\dsh-jev-mode`**。源码、完整 `.git`、本地分支、标签、远端和一个实验 stash 已复制并校验；不是浅克隆或只拷贝发布包。
 - 远端：`https://github.com/QI-seven33/dsh-jev-mode.git`。迁移起点/公开 0.4.6 提交为 `6b45308`。
-- 当前开发分支为 `maintenance/desktop-rc5-0.4.7`，已推送至 origin，包含兼容提交 `9f45db6` 与后续验收文档提交。用户明确暂不申请合并；没有创建 PR、v0.4.7 标签或 Release，远端 main 仍是 `6b45308`。本地 main 保留原兼容提交，后续请在当前维护分支继续工作。完整状态见 `git log` 和 `.local/push-0.4.7.json`。
+- 当前开发分支为 `main`，正常推送并跟踪 `origin/main`，包含兼容提交 `9f45db6` 和桌面验收记录。本次只是迁移本地目录；误建的维护分支已清理。不需要额外合并 PR，没有创建 v0.4.7 标签或 Release。当前提交及清理结果见 `git log` 和 `.local/main-cleanup-0.4.7.json`；旧的本地推送记录仅为历史。
 - 公开 [v0.4.6](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.6) 已发布，支持 Desktop 0.2.2-rc.3。[社区 PR #16291](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/16291) 已合并；不要重复提交。
 - 原仓库 `E:\Codex\Workspace\dsh-jev-mode-release`、原桌面安装目录 `E:\SOME_SEVEN_PROJECT-57\dph_workspace\dsh-jev-mode` 都保留。新工作在主仓库进行，原路径不作为后续开发入口。
 
@@ -96,4 +96,4 @@ git stash list
 
 ## 后续提交和发布
 
-用户已授权把验收通过的 0.4.7 推送 Git，并明确暂不申请分支合并。因此只推送维护分支，**不发起 PR、不合并 main、不创建标签或 Release**；公开发布版仍是 0.4.6。后续合并或发布按用户新要求处理。届时阅读 RELEASING：审阅文件生成干净快照、扫描、对准确产物测试，再提交/打标、上传、验两条公开安装路径。不得覆盖已发布资产、混入 `.local`、推送 stash 或直接重跑带旧提交号的历史发布脚本。新版本社区目录更新先查现有 PR 状态。
+用户已确认：这只是本地目录迁移，项目继续正常在 **main** 开发和推送。验收通过的 0.4.7 已同步到 main，误建的维护分支已删除，没有额外申请 PR 或创建标签、Release；最新正式 Release 仍是 0.4.6。后续发布按用户新要求处理。届时阅读 RELEASING：审阅文件生成干净快照、扫描、对准确产物测试，再提交/打标、上传、验两条公开安装路径。不得覆盖已发布资产、混入 `.local`、推送 stash 或直接重跑带旧提交号的历史发布脚本。新版本社区目录更新先查现有 PR 状态。
