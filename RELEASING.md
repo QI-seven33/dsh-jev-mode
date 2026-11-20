@@ -1,6 +1,6 @@
 # Maintaining releases
 
-Current local candidate: 0.4.7 for Desktop 0.2.2-rc.5. Public latest remains 0.4.6 for rc.3. Read HANDOFF.zh.md for the current main folder and acceptance status; do not run archived release scripts or publish private .local material.
+Current maintenance branch: maintenance/desktop-rc5-0.4.7 for Desktop 0.2.2-rc.5. The maintainer confirmed Desktop acceptance and requested a branch push only; do not open a merge PR, merge main, create a tag or publish a Release yet. Public latest remains 0.4.6 for rc.3. Read HANDOFF.zh.md for the current main folder and acceptance status; do not run archived release scripts or publish private .local material.
 
 The repository includes runnable JavaScript and a dsh.bundle manifest; consumers do not build it. Version 0.4.6 is a compatibility and reliability maintenance release for Desktop 0.2.2-rc.3: retain the existing UI, model and authorization policy, and exclude untracked research and the default-off JSON transaction prototype. Validate linked workspaces with the packaged Electron/ASAR and the default host-injected transport loader; copied profiles or injected test loaders alone do not establish Desktop compatibility.
 

@@ -6,7 +6,7 @@
 
 - **主仓库：`E:\SOME_SEVEN_PROJECT-57\dsh-jev-mode`**。源码、完整 `.git`、本地分支、标签、远端和一个实验 stash 已复制并校验；不是浅克隆或只拷贝发布包。
 - 远端：`https://github.com/QI-seven33/dsh-jev-mode.git`。迁移起点/公开 0.4.6 提交为 `6b45308`。
-- 当前分支 main，本地新增一个 0.4.7 / rc.5 兼容与交接提交，尚未推送、没有创建 v0.4.7 标签或 Release。完整提交号见 `git log` 和 `.local/final-state.json`。GitHub main 于核对时仍是 `6b45308`。
+- 当前开发分支为 `maintenance/desktop-rc5-0.4.7`，已推送至 origin，包含兼容提交 `9f45db6` 与后续验收文档提交。用户明确暂不申请合并；没有创建 PR、v0.4.7 标签或 Release，远端 main 仍是 `6b45308`。本地 main 保留原兼容提交，后续请在当前维护分支继续工作。完整状态见 `git log` 和 `.local/push-0.4.7.json`。
 - 公开 [v0.4.6](https://github.com/QI-seven33/dsh-jev-mode/releases/tag/v0.4.6) 已发布，支持 Desktop 0.2.2-rc.3。[社区 PR #16291](https://github.com/awesome-dsh-plugin/awesome-dsh-plugin/pull/16291) 已合并；不要重复提交。
 - 原仓库 `E:\Codex\Workspace\dsh-jev-mode-release`、原桌面安装目录 `E:\SOME_SEVEN_PROJECT-57\dph_workspace\dsh-jev-mode` 都保留。新工作在主仓库进行，原路径不作为后续开发入口。
 
@@ -26,7 +26,7 @@
 | 本地代理控制流 | 两个本地合成 HTTP 请求；原生 jev_status 返回 0.4.7，jev_decide authorize 返回假端点预设的 deny |
 | 有界真实检查 | 单个真实 authorize 请求，零重试，jev-1.13.0 返回有效 Noul 0.04、559ms，符合合成的禁止发布指令 |
 | 代理与凭据 | 真实检查前后规则模式、TUN 关闭；无代理环境覆盖，使用默认加载器和宿主只读凭据服务；未复制或修改密钥 |
-| 交互式桌面 | 没有强制重启用户桌面；更新后完整重启、新会话与 UI 验收仍需用户完成 |
+| 交互式桌面 | 用户已反馈“验证通过，版本为0.4.7”；记录为用户报告的桌面验收通过，不额外推断性能或误判率 |
 
 这里的真实检查只证明当前链路的一次有效返回，不是五通道重新评估、长期稳定性或误判率评测。先前 0.4.6 的五通道真实检查与两条公开安装路径已通过，详见 VALIDATION；那些结果不能冒充本次 rc.5 的完整交互验收。
 
@@ -36,7 +36,7 @@
 
 宿主 profile：`C:\Users\sevan\.dsh\profiles\desktop`。本轮通过**新版原生 PluginManager**安装 `link:E:/SOME_SEVEN_PROJECT-57/dsh-jev-mode`，同时更新依赖、lockfile 和目录联接；没有只改一个易被重装覆盖的 junction。其他 manifest 字段与插件启用列表保持不变，没有改凭据或 Clash。
 
-用户保存当前任务后，完全退出 Harness，重新打开并新建 JEV 会话。先只调用 jev_status 确认 0.4.7，再做一次普通项目读取；按需做合成决策诊断，不执行真实危险动作作为测试。旧进程缓存不代表磁盘上的当前代码。
+用户已完成本次桌面验收并确认 0.4.7，不需要重复索要这项验收。之后更新宿主或源码时，仍应完整重启、新建会话并核对版本；不执行真实危险动作作为测试。
 
 旧 manifest/lockfile 备份在 `.local/profile-link-backup-2026-11-20/`，安装核对在 `.local/desktop-link.json`。如需退回原安装位置，优先使用宿主原生安装器重装原 link，并选用支持对应宿主的插件版本；不要直接覆盖整个个人 profile 或恢复旧凭据。
 
@@ -96,4 +96,4 @@ git stash list
 
 ## 后续提交和发布
 
-本轮只迁移、适配、验收、做本地提交并交接，**没有公开发布 0.4.7**。先按用户新要求决定是否继续修改、推送或发布。届时阅读 RELEASING：审阅文件生成干净快照、扫描、对准确产物测试，再提交/打标、上传、验两条公开安装路径。不得覆盖已发布资产、混入 `.local`、推送 stash 或直接重跑带旧提交号的历史发布脚本。新版本社区目录更新先查现有 PR 状态。
+用户已授权把验收通过的 0.4.7 推送 Git，并明确暂不申请分支合并。因此只推送维护分支，**不发起 PR、不合并 main、不创建标签或 Release**；公开发布版仍是 0.4.6。后续合并或发布按用户新要求处理。届时阅读 RELEASING：审阅文件生成干净快照、扫描、对准确产物测试，再提交/打标、上传、验两条公开安装路径。不得覆盖已发布资产、混入 `.local`、推送 stash 或直接重跑带旧提交号的历史发布脚本。新版本社区目录更新先查现有 PR 状态。

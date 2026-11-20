@@ -1,6 +1,6 @@
 # DeepSeek Harness JEV 决策模式
 
-> 本地开发主线为 **0.4.7 候选 / Desktop 0.2.2-rc.5**，尚未推送或公开发布。主目录已迁移，后续开发先读 [HANDOFF.zh.md](HANDOFF.zh.md) 与 [START_HERE.zh.md](START_HERE.zh.md)。下文为公开 0.4.6（rc.3）的说明；rc.5 使用本地主线，不要将公开 0.4.6 的版本声明视为支持 rc.5。
+> 本地开发主线为 **0.4.7 候选 / Desktop 0.2.2-rc.5**，已推送维护分支 `maintenance/desktop-rc5-0.4.7`，用户确认桌面验收通过；暂不申请合并或公开发布。主目录已迁移，后续开发先读 [HANDOFF.zh.md](HANDOFF.zh.md) 与 [START_HERE.zh.md](START_HERE.zh.md)。下文为公开 0.4.6（rc.3）的说明；rc.5 使用本地主线，不要将公开 0.4.6 的版本声明视为支持 rc.5。
 
 [English](README.md) · [发布版本](https://github.com/QI-seven33/dsh-jev-mode/releases) · [验证与限制](VALIDATION.md) · [问题反馈](https://github.com/QI-seven33/dsh-jev-mode/issues)
 

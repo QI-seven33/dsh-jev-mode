@@ -1,12 +1,12 @@
 # Validation and measurement boundaries
 
-## Local 0.4.7 / Desktop 0.2.2-rc.5 (2026-11-20)
+## Maintenance 0.4.7 / Desktop 0.2.2-rc.5 (2026-11-20)
 
 The main repository was copied with complete Git history and stash into E:\SOME_SEVEN_PROJECT-57\dsh-jev-mode; the original is retained. The installed host is rc.5. Its standard preset is byte-identical to the previously tested rc.3, but public 0.4.6 declares exact rc.3 compatibility and fails the new-host version check. Local 0.4.7 pins rc.5, updates the status version and preset comment, and changes no decision or permission implementation.
 
 The full suite passes: 40 node:test cases, zero skips, plus the native fixture suites. New portable tools verify the real updated Electron/ASAR, external junction, default loader before hooks, native status/authorize/read and unchanged 40 standard schemas (43 total with JEV). One bounded real authorize request, default loader and read-only native credentials returned valid Noul 0.04 in 559ms, one HTTP request and zero retries; rule mode and TUN-off were confirmed before/after. This is a single connectivity observation, not a five-channel quality or speed evaluation.
 
-The actual desktop dependency, lockfile and junction were updated through native PluginManager to link this main directory. Other profile fields, credentials and proxy settings were preserved. Interactive acceptance after a complete Desktop restart/new session remains pending. 0.4.7 has not been pushed or publicly released. See HANDOFF.zh.md for evidence, commands and remaining steps. Private .local material is excluded from Git, packages and source-only integrity scans; the earlier encoding failure from scanning third-party host caches is preserved in local logs.
+The actual desktop dependency, lockfile and junction were updated through native PluginManager to link this main directory. Other profile fields, credentials and proxy settings were preserved. The maintainer subsequently reported Desktop acceptance and confirmed version 0.4.7; this does not add performance or safety-quality evidence. The accepted candidate is pushed only to maintenance/desktop-rc5-0.4.7. At the user's request there is no merge PR, main merge, tag or Release; public latest remains 0.4.6. See HANDOFF.zh.md for evidence, commands and remaining steps. Private .local material is excluded from Git, packages and source-only integrity scans; the earlier encoding failure from scanning third-party host caches is preserved in local logs.
 
 ## Version 0.4.6 deployment repair
 

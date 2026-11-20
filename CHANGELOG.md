@@ -1,9 +1,9 @@
-# 0.4.7 (local candidate, 2026-11-20)
+# 0.4.7 (maintenance branch, unreleased, 2026-11-20)
 
 - Move the complete development repository and Git/stash history to the new main folder; add developer handoff and portable packaged-host checks. Keep private history and host caches ignored.
 - Pin compatibility to the actually tested Desktop 0.2.2-rc.5. Its standard preset remains byte-identical; no model, thresholds, permission or decision behavior changes.
 - Verify the updated real Electron/ASAR, junction/default-loader deployment, native tools, full suite and one bounded live authorization request. Link the actual desktop installation to the new main folder through native PluginManager.
-- This candidate is locally committed only; no GitHub push, tag or public release. Desktop restart/new-session acceptance is still pending.
+- The maintainer reported Desktop acceptance with version 0.4.7. Push only the maintenance/desktop-rc5-0.4.7 branch; do not open a merge PR, merge main, create a tag or publish a Release. Public latest remains 0.4.6.
 
 # 0.4.6 (2026-11-17)
 
