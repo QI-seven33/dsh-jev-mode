@@ -1,4 +1,4 @@
-# JEV preset for DeepSeek Harness Desktop 0.2.2-rc.3.
+# JEV preset for DeepSeek Harness Desktop 0.2.2-rc.5.
 # The native standard child rows below are copied without semantic changes.
 # JEV adds one fixed plugin; it does not alter the standard preset itself.
 # Revalidate this composition when the host changes. No per-turn tool pruning.

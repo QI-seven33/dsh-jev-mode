@@ -56,7 +56,7 @@ export const name = 'jev-mode';
 export const inject = ['llm', 'tools', 'systemPrompt'];
 
 /** Plugin version, stamped into ledger rows so a schema change is visible. */
-const PLUGIN_VERSION = '0.4.6';
+const PLUGIN_VERSION = '0.4.7';
 
 /**
  * Fixed prompt-section order.

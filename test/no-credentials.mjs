@@ -27,7 +27,7 @@ const SHAPES = [
 ];
 
 const TEXT = /\.(js|mjs|json|yml|yaml|md|svg)$/;
-const SKIP = /[\\/]\.git[\\/]|bench[\\/]results/;
+const SKIP = /[\\/]\.git[\\/]|[\\/]\.local[\\/]|bench[\\/]results/;
 
 const findings = [];
 let scanned = 0;

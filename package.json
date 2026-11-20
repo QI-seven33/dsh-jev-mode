@@ -1,6 +1,6 @@
 {
   "name": "dsh-jev-mode",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "DeepSeek Harness Desktop plugin: deterministic project reads, optional bounded semantic selection, and a separate authorization gate with fixed prompt/tool prefixes.",
   "keywords": [
     "dsh",
@@ -50,7 +50,7 @@
   "icon": "./icon.svg",
   "engines": {
     "node": ">=20.3.0",
-    "dsh": "0.2.2-rc.3"
+    "dsh": "0.2.2-rc.5"
   },
   "devDependencies": {
     "yaml": "^2.6.0"

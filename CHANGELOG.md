@@ -1,3 +1,10 @@
+# 0.4.7 (local candidate, 2026-11-20)
+
+- Move the complete development repository and Git/stash history to the new main folder; add developer handoff and portable packaged-host checks. Keep private history and host caches ignored.
+- Pin compatibility to the actually tested Desktop 0.2.2-rc.5. Its standard preset remains byte-identical; no model, thresholds, permission or decision behavior changes.
+- Verify the updated real Electron/ASAR, junction/default-loader deployment, native tools, full suite and one bounded live authorization request. Link the actual desktop installation to the new main folder through native PluginManager.
+- This candidate is locally committed only; no GitHub push, tag or public release. Desktop restart/new-session acceptance is still pending.
+
 # 0.4.6 (2026-11-17)
 
 - Ship the previously unpublished 0.4.5 Desktop 0.2.2-rc.3 compatibility, native batch/cwd and rule-proxy repairs together with the deployment fix below. Retain the 0.4.4 reliability fixes and existing UI; no experimental features or general performance claims.

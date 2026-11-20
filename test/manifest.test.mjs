@@ -124,7 +124,7 @@ await test('every text file is strict UTF-8, with no replacement or mojibake cha
   const decoder = new TextDecoder('utf-8', { fatal: true });
   const MOJIBAKE = /\u00c3[\u0080-\u00bf]|\u00e2\u20ac|\u00ef\u00bb\u00bf|\ufffd/;
   const text = /\.(js|mjs|json|yml|yaml|md|svg)$/;
-  const skip = /[\\/]\.git[\\/]|bench[\\/]results/;
+  const skip = /[\\/]\.git[\\/]|[\\/]\.local[\\/]|bench[\\/]results/;
   const offenders = [];
   let scanned = 0;
 

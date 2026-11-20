@@ -1,5 +1,7 @@
 # DeepSeek Harness JEV 决策模式
 
+> 本地开发主线为 **0.4.7 候选 / Desktop 0.2.2-rc.5**，尚未推送或公开发布。主目录已迁移，后续开发先读 [HANDOFF.zh.md](HANDOFF.zh.md) 与 [START_HERE.zh.md](START_HERE.zh.md)。下文为公开 0.4.6（rc.3）的说明；rc.5 使用本地主线，不要将公开 0.4.6 的版本声明视为支持 rc.5。
+
 [English](README.md) · [发布版本](https://github.com/QI-seven33/dsh-jev-mode/releases) · [验证与限制](VALIDATION.md) · [问题反馈](https://github.com/QI-seven33/dsh-jev-mode/issues)
 
 由 QI-seven33 独立维护的**非官方、可选桌面预设**。基于 DeepSeek Harness Desktop **0.2.2-rc.3** 的标准能力组合，增加有限的项目文件读取和 JEV 授权检查。主模型沿用你的配置，原有标准预设不变。

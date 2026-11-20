@@ -15,3 +15,6 @@ Thumbs.db
 .dsh/
 *.tgz
 *.zip
+
+# Private handoff history, extracted hosts, fixtures and local packages
+.local/
